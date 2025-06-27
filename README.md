@@ -1,104 +1,116 @@
 ABOUTME: This file provides setup instructions for creating prompt files and configuring GitHub repositories.
-ABOUTME: It also includes steps for installing and configuring Git.
+ABOUTME: It also includes steps for installing and configuring Git, and outlines the agent-assisted pipeline template.
 
-#### Create instructions and prompt files in VS Code
+# Project Setup and Agent-Assisted Pipeline Template
 
-1. Enable `chat.promptFiles` setting in VS Code:
-   - Open your settings (File > Preferences > Settings).
-   - Search for `chat.promptFiles`.
-   - Check the box to enable it.
+This repository serves as a template for our end-to-end agent-assisted pipeline. Teams can use this template to:
+- Brainstorm new software product ideas with a chat LLM.
+- Convert ideas into detailed software specifications (`spec.md`).
+- Generate prompt plans (`prompt_plan.md`) and to-do lists (`todo.md`) for execution.
+- Seamlessly create GitHub issues, manage tasks, and execute work through coding agents.
 
-2. Enable `github.copilot.chat.codeGeneration.useInstructionFiles` setting in VS Code:
-   - In the same settings window, search for `github.copilot.chat.codeGeneration.useInstructionFiles`.
-   - Check the box to enable it.
+## Table of Contents
 
-3. Create `.github` directory in your project root:
-   - Open your terminal or command prompt.
-   - Navigate to your project directory.
-   - Run the following command:
-     ```bash
-     mkdir -p .github
-     ```
+- [Instructions](#instructions)
+- [Agent-Assisted Pipeline Overview](#agent-assisted-pipeline-overview)
+- [Setup Instructions](#setup-instructions)
+- [Usage](#usage)
+- [GitHub Integration](#github-integration)
+- [Example Artifacts](#example-artifacts)
+- [Contribution Guidelines](#contribution-guidelines)
 
-4. Create instructions file:
-   - In the `.github` directory, create a file named `copilot-instructions.md`.
+## Instructions
 
-Chat with `gpt-4o` to hone your idea.
-Use the best reasoning model you can find to generate the spec. These days it is `o1-pro` or `o3`.
-Use the reasoning model to generate the prompts.
-Save `spec.md` and `prompt_plan.md` in the root of the project.
+1. **Enable VS Code Settings:**
+   - Enable `chat.promptFiles`:
+     - Open VS Code settings: File > Preferences > Settings.
+     - Search for `chat.promptFiles` and check the box.
+   - Enable `github.copilot.chat.codeGeneration.useInstructionFiles`:
+     - Search for this setting and check the box.
 
----
+2. **Directory Structure:**
+   - Ensure your project root includes a `.github` directory with all required prompt files (e.g., `copilot-instructions.md`, prompts in `/.github/prompts/`).
 
-### Install Git
+## Agent-Assisted Pipeline Overview
 
-1. **Install Git**: If you haven't already, download and install Git from [git-scm.com](https://git-scm.com/).
-2. **Configure Git**: Open your terminal or command prompt and set your username and email:
+This template supports an automated workflow that:
+- Assists with brainstorming using chat LLMs.
+- Extracts a detailed spec from ideas (saved as `spec.md`).
+- Generates a prompt plan (`prompt_plan.md`) and a to-do list (`todo.md`).
+- Integrates with GitHub to manage issues, commits, and pull requests automatically.
+
+## Setup Instructions
+
+### Git Setup
+1. **Install Git:**  
+   Download and install Git from [git-scm.com](https://git-scm.com/).
+2. **Configure Git:**
    ```bash
    git config --global user.name "Your Name"
    git config --global user.email "your_email@example.com"
    ```
 
----
+### Python and Package Management
+- We use `uv` for Python package management.
+- There is no need for a `requirements.txt`; packages are managed in `pyproject.toml`.
+- To run a script, use:
+  ```bash
+  uv run <script.py>
+  ```
+- To add a package, use:
+  ```bash
+  uv add <package>
+  ```
 
-### Setup GitHub Repository
-
-1. **Check Your GitHub Permissions**:
-   - Ensure that you are logged into GitHub with the correct account.
-   - Verify that you have write access to the repository (`wittyreference/vibe-coding`). If it's not your repository, ask the owner to grant you write access.
-
-2. **Authenticate with GitHub**:
-   - If you haven't authenticated with GitHub, you need to set up authentication. Use one of the following methods:
-
-3. **Generate a Personal Access Token**:
-   - Go to [GitHub Settings > Developer Settings > Personal Access Tokens](https://github.com/settings/tokens).
-   - Click "Generate new token" and select the necessary scopes (e.g., `repo` for repository access).
-   - Copy the generated token and save it as an environment variable in step 5.
-   - Use the token instead of your password when prompted during `git push`.
-
-     Example:
-     ```bash
-     git remote set-url origin https://<username>:<personal-access-token>@github.com/wittyreference/vibe-coding.git
-     ```
-
-4. **Create a directory for your project**:
+### Environment Variables
+1. Create a `.env` file in the project root:
    ```bash
-   mkdir my-project
-   git init
-   git add .
-   git commit -m "Initial commit"
-   git remote add origin https://github.com/username/my-project.git
+   touch .env
+   echo "GITHUB_TOKEN=your_personal_access_token_here" >> .env
+   ```
+2. Load the environment variable in your terminal session:
+   ```bash
+   export GITHUB_TOKEN=$(grep GITHUB_TOKEN .env | cut -d '=' -f2)
    ```
 
-5. **Set Up Environment Variables**:
-   - If you are using a personal access token, set it as an environment variable. In your project directory, create a `.env` file:
-     ```bash
-     touch .env
-     ```
-   - Add your token to the `.env` file:
-     ```bash
-     GITHUB_TOKEN=your_personal_access_token_here
-     ```
-   - Load the environment variable in your terminal session:
-     ```bash
-     export GITHUB_TOKEN=$(cat .env | grep GITHUB_TOKEN | cut -d '=' -f2)
-     ```
+## Usage
 
-6. **Use the token in your commands**:
-   - When you push changes, use the token for authentication:
-     ```bash
-     git push https://<username>:$GITHUB_TOKEN
-     ```
+- **Idea Generation and Specification:**
+  - Initiate brainstorming using `brainstorm.md` (located in `/.github/prompts/`).
+  - Finalize and save the software spec as `spec.md`.
 
-7. **Add `.env` to `.gitignore`**:
-   - Ensure that your `.env` file is not tracked by Git by adding it to your `.gitignore` file:
-     ```bash
-     echo ".env" >> .gitignore
-     ```
+- **Generating Task Artifacts:**
+  - Use `plan.md` to generate a detailed prompt plan (`prompt_plan.md`).
+  - Maintain a task tracker in `todo.md`.
 
-8. **Push Changes**:
-   - Now you can push your changes to the repository:
-     ```bash
-     git remote set-url origin https://<username>:<personal-access-token>@github.com/wittyreference/vibe-coding.git
-     git push -u origin main
-     ```
+- **Running the Pipeline:**
+  - Follow the prompts in `/.github/prompts/` for creating GitHub issues, running tests, and marking tasks complete.
+  - Leverage GitHub Actions (see below) to automate testing and linting.
+
+## GitHub Integration
+
+- **Automation with GitHub Actions:**
+  - Configure workflows (e.g., in `.github/workflows/ci.yml`) to run tests and linting on commits.
+  - Automate syncing between prompt files and GitHub issues, ensuring tasks in `todo.md` are tracked.
+
+- **Issue & Task Management:**
+  - Use agent scripts to create issues, add items to the to-do list, and mark items as complete.
+  - Follow our workflow prompts (see files in `/.github/prompts/`) to keep GitHub issues and to-do tasks scoped and updated.
+
+## Example Artifacts
+
+- `spec.md`: Detailed software specification.
+- `prompt_plan.md`: Comprehensive prompt plan for executing tasks.
+- `todo.md`: Task tracker for to-do items.
+- Additional prompts for TDD, code reviews, and GitHub issue management are located in `/.github/prompts/`.
+
+## Contribution Guidelines
+
+- **TDD Practice:**
+  - Write tests before implementation.
+  - Ensure tests and linting pass before any commit.
+- **Commit Requirements:**
+  - Never use `--no-verify` during commits.
+  - Make small, incremental changes and retain all relevant comments starting with "ABOUTME:".
+- **Documentation:**
+  - Maintain clear comments and contribution instructions within files.
