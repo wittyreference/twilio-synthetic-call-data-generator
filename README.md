@@ -1,6 +1,3 @@
-ABOUTME: This file provides setup instructions for creating prompt files and configuring GitHub repositories.
-ABOUTME: It also includes steps for installing and configuring Git, and outlines the agent-assisted pipeline template.
-
 # Project Setup and Agent-Assisted Pipeline Template
 
 This repository serves as a template for our end-to-end agent-assisted pipeline. Teams can use this template to:
