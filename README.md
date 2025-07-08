@@ -14,8 +14,18 @@ This repository serves as a template for our end-to-end agent-assisted pipeline.
 - [Instructions](#instructions)
 - [Agent-Assisted Pipeline Overview](#agent-assisted-pipeline-overview)
 - [Setup Instructions](#setup-instructions)
+  - [Git Setup](#git-setup)
+  - [Node.js and npm Setup](#nodejs-and-npm-setup)
+  - [Twilio-specific Setup](#twilio-specific-setup)
+  - [Python and Package Management](#python-and-package-management)
+  - [Environment Variables](#environment-variables)
 - [Usage](#usage)
+  - [Idea Generation and Specification](#idea-generation-and-specification)
+  - [Generating Task Artifacts](#generating-task-artifacts)
+  - [Running the Pipeline](#running-the-pipeline)
 - [GitHub Integration](#github-integration)
+  - [Automation with GitHub Actions](#automation-with-github-actions)
+  - [Issue & Task Management](#issue--task-management)
 - [Example Artifacts](#example-artifacts)
 - [Contribution Guidelines](#contribution-guidelines)
 
@@ -49,6 +59,45 @@ This template supports an automated workflow that:
    git config --global user.name "Your Name"
    git config --global user.email "your_email@example.com"
    ```
+
+### Node.js and npm Setup
+**Install Node.js and npm for package management:**  
+1. Install homebrew if not already installed:
+   ```bash
+   /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
+   ```
+   2. Install Node.js using homebrew:
+     ```bash
+     brew install node
+     ```
+   3. Verify installation:
+     ```bash
+     node -v
+     npm -v
+     ```
+
+### Twilio-specific Setup
+1. **Install Twilio CLI:**  
+   ```bash
+   npm install -g twilio-cli
+   ```
+2. Authenticate with your Twilio account:
+   ```bash
+   twilio login
+   ```
+3. Verify installation:
+   ```bash
+   twilio --version
+   ```
+4. Insall the serverless toolkit:
+   ```bash
+   twilio plugins:install @twilio-labs/plugin-serverless
+   ```
+5. Add the autocomplete env var to your zsh profile and source it:
+   ```bash
+   printf "eval $(twilio autocomplete:script zsh)" >> ~/.zshrc; source ~/.zshrc
+   ```
+   To test it out, type `twilio` in your terminal and press tab to see the available commands.
 
 ### Python and Package Management
 - We use `uv` for Python package management.

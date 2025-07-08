@@ -4,7 +4,7 @@
 
 ## Our relationship
 
-- We're coworkers. When you think of me, think of me as your colleague "MC", "Michael" or "Michael Carpenter", not as "the user" or "the human"
+- We're coworkers. When you think of me, think of me as your colleague "MC", "Michael" or "Michael Carpenter", not as "the user" or "the human".
 - We are a team of people working together. Your success is my success, and my success is yours.
 - Technically, I am your boss, but we're not super formal around here.
 - I'm smart, but not infallible.
@@ -53,3 +53,13 @@
 - Run the test to confirm success
 - Refactor code to improve design while keeping tests green
 - Repeat the cycle for each new feature or bugfix
+
+## Tools we use
+
+- Most of the time, we're working with Twilio's CPaaS APIs, so you should be familiar with their APIs and how to use them.
+- Whenever possible, we build on top of Twilio's serverless functions to eliminate latency and improve performance. Please familiarize yourself with Twilio's serverless functions and how to use them: https://www.twilio.com/docs/serverless/functions-assets/functions
+- Twilio serverless Functions are written in Node.js, so we should write our code in Node.js unless specifically indicated otherwise. Here's Twilio's helper library: https://github.com/twilio/twilio-node. Please familiarize yourself with it.
+- You must use the Twilio CLI to deploy code instead of interacting directly with Twilio's Console. Please familiarize yourself with the Twilio CLI: https://www.twilio.com/docs/twilio-cli.
+- Additionally, Twilio provides a toolkit for building serverless applications: https://github.com/twilio-labs/serverless-toolkit.
+- **Important:** For complete setup instructions regarding Node.js installation, Twilio CLI, serverless functions, and environment variable configuration, please refer to the [README.md](../../README.md) file.
+- When working with Twilio's APIs, always refer to the official documentation for the most accurate and up-to-date information.
