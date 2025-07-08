@@ -89,7 +89,7 @@ This template supports an automated workflow that:
    ```bash
    twilio --version
    ```
-4. Insall the serverless toolkit:
+4. Install the serverless toolkit:
    ```bash
    twilio plugins:install @twilio-labs/plugin-serverless
    ```
