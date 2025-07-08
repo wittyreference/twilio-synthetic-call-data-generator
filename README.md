@@ -41,14 +41,6 @@ This repository serves as a template for our end-to-end agent-assisted pipeline.
 2. **Directory Structure:**
    - Ensure your project root includes a `.github` directory with all required prompt files (e.g., `copilot-instructions.md`, prompts in `/.github/prompts/`).
 
-## Agent-Assisted Pipeline Overview
-
-This template supports an automated workflow that:
-- Assists with brainstorming using chat LLMs.
-- Extracts a detailed spec from ideas (saved as `spec.md`).
-- Generates a prompt plan (`prompt_plan.md`) and a to-do list (`todo.md`).
-- Integrates with GitHub to manage issues, commits, and pull requests automatically.
-
 ## Setup Instructions
 
 ### Git Setup
@@ -125,15 +117,15 @@ This template supports an automated workflow that:
 ## Usage
 
 - **Idea Generation and Specification:**
-  - Initiate brainstorming using `brainstorm.md` (located in `/.github/prompts/`).
+  - Initiate brainstorming using `brainstorm.md` (located in `/.github/prompts/`) with a chat model like 4o.
   - Finalize and save the software spec as `spec.md`.
 
 - **Generating Task Artifacts:**
-  - Use `plan.md` to generate a detailed prompt plan (`prompt_plan.md`).
+  - Use `plan.md` with a reasoning model like o3 to generate a detailed prompt plan (`prompt_plan.md`).
   - Maintain a task tracker in `todo.md`.
 
 - **Running the Pipeline:**
-  - Follow the prompts in `/.github/prompts/` for creating GitHub issues, running tests, and marking tasks complete.
+  - Follow the prompts in `/.github/prompts/` with a chat model like 4o, or a coding model you prefer, for generating code, creating GitHub issues, running tests, and marking tasks complete.
   - Leverage GitHub Actions (see below) to automate testing and linting.
 
 ## GitHub Integration
@@ -152,14 +144,3 @@ This template supports an automated workflow that:
 - `prompt_plan.md`: Comprehensive prompt plan for executing tasks.
 - `todo.md`: Task tracker for to-do items.
 - Additional prompts for TDD, code reviews, and GitHub issue management are located in `/.github/prompts/`.
-
-## Contribution Guidelines
-
-- **TDD Practice:**
-  - Write tests before implementation.
-  - Ensure tests and linting pass before any commit.
-- **Commit Requirements:**
-  - Never use `--no-verify` during commits.
-  - Make small, incremental changes and retain all relevant comments starting with "ABOUTME:".
-- **Documentation:**
-  - Maintain clear comments and contribution instructions within files.
