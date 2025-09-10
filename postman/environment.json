@@ -1,0 +1,37 @@
+{
+  "id": "test-environment",
+  "name": "Test Environment",
+  "values": [
+    {
+      "key": "base_url",
+      "value": "https://your-serverless-functions-domain.twil.io/dev",
+      "enabled": true,
+      "type": "default"
+    },
+    {
+      "key": "test_phone_number",
+      "value": "+15551234567",
+      "enabled": true,
+      "type": "default"
+    },
+    {
+      "key": "twilio_phone_number",
+      "value": "+15559876543",
+      "enabled": true,
+      "type": "default"
+    },
+    {
+      "key": "account_sid",
+      "value": "AC_test_account_sid",
+      "enabled": true,
+      "type": "secret"
+    },
+    {
+      "key": "auth_token",
+      "value": "test_auth_token",
+      "enabled": true,
+      "type": "secret"
+    }
+  ],
+  "_postman_variable_scope": "environment"
+}

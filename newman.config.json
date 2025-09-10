@@ -1,0 +1,21 @@
+{
+  "collection": "./postman/collection.json",
+  "environment": "./postman/environment.json",
+  "reporters": ["cli", "json", "junit"],
+  "reporter": {
+    "json": {
+      "export": "./test-results/newman-results.json"
+    },
+    "junit": {
+      "export": "./test-results/newman-junit.xml"
+    }
+  },
+  "iterationCount": 1,
+  "delayRequest": 500,
+  "timeout": 30000,
+  "timeoutRequest": 10000,
+  "insecure": false,
+  "bail": false,
+  "suppressExitCode": false,
+  "color": "on"
+}

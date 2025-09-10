@@ -1,3 +1,7 @@
+# CLAUDE.md
+
+This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
+
 # Interaction
 
 - Any time you interact with me, you MUST address me as "MC"
@@ -39,6 +43,22 @@
 - If the logs are supposed to contain errors, capture and test it.
 - NO EXCEPTIONS POLICY: Under no circumstances should you mark any test type as "not applicable". Every project, regardless of size or complexity, MUST have unit tests, integration tests, AND end-to-end tests. If you believe a test type doesn't apply, you need the human to say exactly "I AUTHORIZE YOU TO SKIP WRITING TESTS THIS TIME"
 
+## Testing Frameworks
+
+- **Jest**: For Node.js/JavaScript unit and integration tests
+  - Run tests: `npm test`
+  - Watch mode: `npm run test:watch`
+  - Coverage: `npm run test:coverage`
+- **pytest**: For Python unit and integration tests
+  - Run tests: `uv run pytest`
+  - Watch mode: `uv run pytest-watch`
+  - Coverage: `uv run pytest --cov`
+- **Newman**: For API/end-to-end test validation
+  - Run collections: `newman run postman/collection.json`
+  - With environment: `newman run postman/collection.json -e postman/environment.json`
+  - With config file: `newman run --config newman.config.json`
+  - Install globally: `npm install -g newman`
+
 ## We practice TDD. That means:
 
 - Write tests before writing the implementation code
@@ -63,3 +83,44 @@
 - Additionally, Twilio provides a toolkit for building serverless applications: https://github.com/twilio-labs/serverless-toolkit.
 - **Important:** For complete setup instructions regarding Node.js installation, Twilio CLI, serverless functions, and environment variable configuration, please refer to the [README.md](../../README.md) file.
 - When working with Twilio's APIs, always refer to the official documentation for the most accurate and up-to-date information.
+
+# Package Management
+
+## Python Development
+- Use `uv` for Python package management (no requirements.txt needed)
+- Run scripts with: `uv run <script.py>`
+- Add packages with: `uv add <package>`
+- Packages are managed in `pyproject.toml`
+- Install test dependencies: `uv add --group test pytest pytest-cov pytest-asyncio pytest-watch httpx requests`
+
+## Node.js Development  
+- Use `npm` for Node.js package management
+- Install packages with: `npm install <package>`
+- Packages are managed in `package.json`
+- Install test dependencies: `npm install --save-dev jest ts-jest @types/jest supertest newman`
+
+# Agent-Assisted Pipeline
+
+This repository uses an agent-assisted pipeline with structured workflows:
+
+- **Brainstorming**: Use `.github/prompts/brainstorm.md` with chat models for idea generation
+- **Specification**: Create detailed software specs in `spec.md`
+- **Planning**: Use `.github/prompts/plan.md` with reasoning models to generate `prompt_plan.md`
+- **Task Management**: Maintain task tracking in `todo.md` - always check off completed work
+- **Execution**: Follow prompts in `.github/prompts/` for code generation, GitHub issues, and task completion
+
+# Workflow Requirements
+
+- **Testing**: Make sure all tests pass before marking tasks as done
+- **Linting**: Ensure linting passes before completing tasks
+- **Todo Management**: If `todo.md` exists, check off any completed work
+- **GitHub Integration**: Use agent scripts to create issues and sync with todo tasks
+
+# Test Configuration Files
+
+- `jest.config.js` - Jest configuration for Node.js testing
+- `jest.setup.js` - Jest setup with Twilio mocks
+- `pyproject.toml` - pytest configuration and Python dependencies
+- `postman/collection.json` - Postman API test collection
+- `postman/environment.json` - Environment variables for Postman tests
+- `newman.config.json` - Newman CLI configuration for automated API testing
