@@ -1,6 +1,6 @@
 # Vibe Clauding - Agent-Assisted Development Pipeline
 
-A production-ready template for rapid software development using AI agents, test-driven development, and automated workflows. Build Twilio Voice applications with comprehensive testing, CI/CD, and GitHub integration.
+A production-ready template for rapid software development using AI agents, test-driven development, and automated workflows. Build Twilio Voice applications with comprehensive testing, CI/CD, and GitHub integration assisted and enabled by Claude Code.
 
 ## 🚀 Features
 
@@ -41,7 +41,7 @@ git clone https://github.com/wittyreference/vibe-clauding.git
 cd vibe-clauding
 
 # Set up your own git remote
-git remote set-url origin https://github.com/wittyreference/your-project.git
+git remote set-url origin https://github.com/your-username/your-project.git
 ```
 
 ### 2. Run Automated Setup
@@ -68,7 +68,7 @@ Edit the `.env` file created by setup:
 # Required for GitHub integration
 GITHUB_TOKEN=your_github_personal_access_token
 GITHUB_OWNER=your-github-username
-GITHUB_REPO=vibe-clauding
+GITHUB_REPO=your-github-repo-name
 
 # Required for Twilio integration
 TWILIO_ACCOUNT_SID=your_twilio_account_sid
@@ -142,7 +142,7 @@ If you prefer manual setup or encounter issues:
 
 ```bash
 # Development
-npm run dev                 # Start local Twilio Functions server
+npm run dev                # Start local Twilio Functions server
 npm run build              # Run linting, tests, and formatting checks
 
 # Testing
@@ -150,7 +150,7 @@ npm test                   # Run all Jest tests
 npm run test:watch         # Run tests in watch mode
 npm run test:coverage      # Generate coverage report
 npm run test:api           # Run Newman API tests
-uv run pytest             # Run Python tests (if applicable)
+uv run pytest              # Run Python tests (if applicable)
 
 # Code Quality
 npm run lint               # Check code quality
@@ -368,4 +368,4 @@ MIT License - see [LICENSE](LICENSE) file for details.
 
 ---
 
-**Ready to build?** Start with `git clone` and `npm run setup` - you'll be coding in minutes! 🚀
+**Ready to build?** Start with `git clone` and `npm run setup` - you'll be ready to party! 🚀
