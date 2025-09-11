@@ -8,7 +8,7 @@ A production-ready template for rapid software development using AI agents, test
 ✅ **Twilio Voice Integration** - Pre-configured serverless functions with TTS  
 ✅ **Test-Driven Development** - Jest, pytest, Newman with 80% coverage targets  
 ✅ **GitHub Automation** - Bidirectional sync between todos and issues  
-✅ **Agent-Assisted Workflow** - Structured prompts for AI-powered development  
+✅ **Agent-Assisted Workflow** - Structured prompts for multiple AI coding agents  
 ✅ **One-Command Setup** - Automated environment configuration  
 
 ## 🛠 Tech Stack
@@ -27,6 +27,7 @@ A production-ready template for rapid software development using AI agents, test
 - [Testing Strategy](#testing-strategy)
 - [Automation Scripts](#automation-scripts)
 - [CI/CD Pipeline](#cicd-pipeline)
+- [AI Coding Agents Setup](#ai-coding-agents-setup)
 - [Agent-Assisted Development](#agent-assisted-development)
 - [Project Structure](#project-structure)
 - [Contributing](#contributing)
@@ -60,7 +61,7 @@ The setup script will:
 - ✅ Create sample project files
 - ✅ Run initial tests
 
-### 3. Configure Credentials
+### 3. Configure Credentials & AI Agents
 
 Edit the `.env` file created by setup:
 
@@ -73,11 +74,17 @@ GITHUB_REPO=your-github-repo-name
 # Required for Twilio integration
 TWILIO_ACCOUNT_SID=your_twilio_account_sid
 TWILIO_AUTH_TOKEN=your_twilio_auth_token
+
+# Optional: AI Coding Agents
+OPENAI_API_KEY=your_openai_api_key_for_codex
+ANTHROPIC_API_KEY=your_anthropic_api_key_for_claude
 ```
 
 **Get your tokens:**
 - GitHub token: [github.com/settings/tokens](https://github.com/settings/tokens)
 - Twilio credentials: [console.twilio.com](https://console.twilio.com)
+- OpenAI API key: [platform.openai.com/api-keys](https://platform.openai.com/api-keys)
+- Anthropic API key: [console.anthropic.com](https://console.anthropic.com)
 
 ### 4. Start Development
 
@@ -260,6 +267,101 @@ The `GITHUB_TOKEN` is automatically provided by GitHub Actions.
 
 - **Development**: `npm run twilio:deploy:dev`
 - **Production**: `npm run twilio:deploy:prod` (auto-deployed via CI/CD)
+
+## 🤖 AI Coding Agents Setup
+
+This template supports multiple AI coding assistants to maximize development productivity:
+
+### Supported AI Agents
+
+#### 1. **Claude Code** (Anthropic) - Primary Agent
+- **Best for**: Architecture, complex logic, test-driven development
+- **Setup**: Use this template directly with Claude Code CLI
+- **Configuration**: Pre-configured with `.github/CLAUDE.md`
+
+#### 2. **GitHub Copilot** (OpenAI)
+- **Best for**: Code completion, boilerplate generation, quick fixes  
+- **Setup**: Install VS Code extension `GitHub.copilot`
+- **Configuration**: Automatically works with VS Code workspace settings
+
+#### 3. **OpenAI Codex** (via API)
+- **Best for**: Custom integrations, automated code generation scripts
+- **Setup**: Add `OPENAI_API_KEY` to `.env` file
+- **Configuration**: Use in custom automation scripts
+
+#### 4. **Cursor AI** (Custom)
+- **Best for**: IDE-integrated AI assistance
+- **Setup**: Use Cursor IDE instead of VS Code
+- **Configuration**: Workspace settings template included
+
+### AI Agent Coordination Strategy
+
+**For Maximum Efficiency:**
+
+1. **Planning Phase**: Use Claude Code for architecture and specification
+2. **Implementation**: Use GitHub Copilot for rapid code completion
+3. **Testing**: Use Claude Code for comprehensive test generation
+4. **Debugging**: Use any agent for specific error resolution
+5. **Refactoring**: Use Claude Code for structural improvements
+
+### Environment Configuration
+
+Add AI agent credentials to your `.env` file:
+
+```bash
+# AI Coding Agents (Optional)
+OPENAI_API_KEY=your_openai_api_key_here
+ANTHROPIC_API_KEY=your_anthropic_api_key_here
+GITHUB_COPILOT_ENABLED=true
+CURSOR_AI_ENABLED=false
+```
+
+### VS Code Extensions for AI
+
+The setup script automatically configures these extensions:
+
+```json
+{
+  "recommendations": [
+    "GitHub.copilot",
+    "GitHub.copilot-chat", 
+    "ms-vscode.vscode-ai",
+    "Continue.continue",
+    "TabNine.tabnine-vscode"
+  ]
+}
+```
+
+### Agent-Specific Workflows
+
+#### Using Claude Code
+```bash
+# Start with specification and planning
+# Use .github/prompts/plan.md for structured planning
+# Follow TDD approach with comprehensive tests
+```
+
+#### Using GitHub Copilot  
+```bash
+# Enable in VS Code settings
+# Use for rapid code completion during implementation
+# Leverage chat feature for quick explanations
+```
+
+#### Using Multiple Agents
+```bash
+# 1. Plan with Claude Code
+# 2. Implement with Copilot completions  
+# 3. Test with Claude Code comprehensive tests
+# 4. Debug with any agent as needed
+```
+
+### AI Agent Best Practices
+
+- **Context Switching**: Use different agents for different types of tasks
+- **Validation**: Always run tests after AI-generated code
+- **Review**: Human review of all AI-generated critical functionality
+- **Iteration**: Use multiple agents to validate complex solutions
 
 ## 🧠 Agent-Assisted Development
 

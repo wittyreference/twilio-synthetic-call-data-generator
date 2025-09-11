@@ -132,6 +132,12 @@ TWILIO_AUTH_TOKEN=your_twilio_auth_token_here
 # Development Settings
 NODE_ENV=development
 PORT=3000
+
+# AI Coding Agents (Optional)
+OPENAI_API_KEY=your_openai_api_key_here
+ANTHROPIC_API_KEY=your_anthropic_api_key_here
+GITHUB_COPILOT_ENABLED=true
+CURSOR_AI_ENABLED=false
 `;
 
     try {
@@ -228,6 +234,9 @@ PORT=3000
           'ms-python.black-formatter',
           'twilio-labs.serverless-toolkit-vscode',
           'github.copilot',
+          'github.copilot-chat',
+          'continue.continue',
+          'tabnine.tabnine-vscode',
         ],
       };
 
