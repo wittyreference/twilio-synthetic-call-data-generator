@@ -152,7 +152,7 @@ exports.handler = async function (context, event, callback) {
     // Get OpenAI response
     console.log(`🤖 Sending to OpenAI with ${messages.length} messages`);
     const completion = await openai.chat.completions.create({
-      model: 'gpt-4o-mini',
+      model: 'gpt-5-nano',
       messages: messages,
       temperature: 0.7,
       max_tokens: 150,

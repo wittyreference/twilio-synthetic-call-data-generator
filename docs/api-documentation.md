@@ -782,7 +782,7 @@ Processes speech input via OpenAI GPT-4o and generates AI response.
 - `SpeechResult` (string): Transcribed speech from Gather
 
 **OpenAI Integration:**
-- **Model:** gpt-4o-mini
+- **Model:** gpt-5-nano
 - **Temperature:** 0.7 (natural variation)
 - **Max Tokens:** 150 (concise responses)
 - **System Prompt:** Dynamically loaded from persona JSON files

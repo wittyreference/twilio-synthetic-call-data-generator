@@ -426,7 +426,7 @@ describe('Respond Function', () => {
       expect(mockCreate).toHaveBeenCalled();
     });
 
-    it('should use gpt-4o-mini model', async () => {
+    it('should use gpt-5-nano model', async () => {
       mockCreate.mockResolvedValue({
         choices: [{ message: { content: 'Test response' } }],
       });
@@ -442,7 +442,7 @@ describe('Respond Function', () => {
 
       expect(mockCreate).toHaveBeenCalledWith(
         expect.objectContaining({
-          model: 'gpt-4o-mini',
+          model: 'gpt-5-nano',
         })
       );
     });
