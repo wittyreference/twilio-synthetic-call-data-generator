@@ -59,7 +59,7 @@ SYNC_SERVICE_SID=ISxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
 
 ## Step 3: Configure Rate Limiting (Optional)
 
-By default, the system allows **1000 OpenAI calls per day** (~$30-50/day at GPT-4o pricing).
+By default, the system allows **1000 OpenAI calls per day** (~$0.70/day at gpt-4o-mini pricing).
 
 **⚠️ IMPORTANT:** Configure this based on your budget and expected usage!
 
@@ -69,13 +69,13 @@ Edit `.env`:
 
 ```env
 # Conservative (low cost)
-MAX_DAILY_CALLS=100    # ~$3-5/day
+MAX_DAILY_CALLS=100    # ~$0.07/day
 
 # Default (moderate usage)
-MAX_DAILY_CALLS=1000   # ~$30-50/day
+MAX_DAILY_CALLS=1000   # ~$0.70/day
 
 # High volume (enterprise)
-MAX_DAILY_CALLS=10000  # ~$300-500/day
+MAX_DAILY_CALLS=10000  # ~$7/day
 ```
 
 ### Rate Limit Behavior

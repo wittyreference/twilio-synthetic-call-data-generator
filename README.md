@@ -40,14 +40,14 @@ Generates realistic synthetic call data for testing, development, and analytics:
 |---------|-------|------|
 | Twilio Voice | 200 minutes @ $0.013/min | ~$2.60 |
 | Twilio Voice Intelligence | 200 minutes @ $0.02/min | ~$4.00 |
-| OpenAI GPT-4o | ~1,500 calls @ $0.015/1K tokens | ~$15-25 |
+| OpenAI GPT-4o-mini | ~1M tokens @ $0.15/1M input, $0.60/1M output | ~$0.25 |
 | Twilio Sync | Included in usage | Free tier |
 | Segment CDP | Up to 10K MTUs/month | Free tier |
-| **Total** | | **~$22-32 per 100 calls** |
+| **Total** | | **~$7 per 100 calls** |
 
 **Budget Planning**:
-- `MAX_DAILY_CALLS=1000` (default) = ~$220-320/day maximum
-- `MAX_DAILY_CALLS=100` = ~$22-32/day for testing
+- `MAX_DAILY_CALLS=1000` (default) = ~$70/day maximum
+- `MAX_DAILY_CALLS=100` = ~$7/day for testing
 - Adjust `MAX_DAILY_CALLS` in `.env` to control spending
 
 **Cost-Saving Tips**:
