@@ -59,14 +59,13 @@ Generates realistic synthetic call data for testing, development, and analytics:
 ## 📋 Table of Contents
 
 - [Quick Start](#quick-start)
+- [Development Tools](#development-tools)
 - [Detailed Setup](#detailed-setup)
 - [Development Workflow](#development-workflow)
 - [Testing Strategy](#testing-strategy)
-- [Automation Scripts](#automation-scripts)
 - [CI/CD Pipeline](#cicd-pipeline)
-- [AI Coding Agents Setup](#ai-coding-agents-setup)
-- [Agent-Assisted Development](#agent-assisted-development)
 - [Project Structure](#project-structure)
+- [Example Use Cases](#example-use-cases)
 - [Contributing](#contributing)
 
 ## 📚 Documentation Quick Links
@@ -283,15 +282,6 @@ npm run twilio:deploy      # Deploy to Twilio production
 npm run twilio:deploy:dev  # Deploy to development environment
 ```
 
-### Agent-Assisted Development Process
-
-1. **Brainstorm** using `.github/prompts/brainstorm.md`
-2. **Create specification** in `spec.md` 
-3. **Generate plan** using `.github/prompts/plan.md` → `prompt_plan.md`
-4. **Track tasks** in `todo.md`
-5. **Follow TDD** with `.github/prompts/tdd.md`
-6. **Sync with GitHub** using automation scripts
-
 ## 🧪 Testing Strategy
 
 ### Test-Driven Development (TDD)
@@ -312,58 +302,29 @@ We practice strict TDD with comprehensive coverage:
 ### Running Tests
 
 ```bash
-# Node.js tests
-npm test                    # All tests
-npm run test:watch          # Watch mode
-npm run test:coverage       # With coverage
+# All tests (634 tests)
+npm test
 
-# Python tests
-uv run pytest              # All Python tests  
-uv run pytest --cov        # With coverage
-uv run pytest-watch        # Watch mode
+# Watch mode for development
+npm run test:watch
 
-# API tests
-npm run test:api            # Run Postman collection
+# Coverage report
+npm run test:coverage
+
+# API tests (Newman/Postman)
+npm run test:api
 newman run postman/collection.json -e postman/environment.json
 ```
-
-## 🤖 Automation Scripts
-
-### GitHub Issue Management
-
-**Create issues from todos:**
-```bash
-npm run create-issue from-todos    # Convert todo.md items to GitHub issues
-npm run create-issue create "Title" "Body" "label1,label2"  # Custom issue
-```
-
-**Sync todos with GitHub issues:**
-```bash
-npm run sync-todos                 # Full bidirectional sync
-npm run sync-todos todos-to-issues # One-way: todos → issues
-npm run sync-todos issues-to-todos # One-way: issues → todos
-```
-
-### Project Management
-
-The automation scripts maintain consistency between:
-- `todo.md` ↔ GitHub Issues
-- Local task tracking ↔ Team visibility
-- Completed todos automatically close GitHub issues
-- New GitHub issues appear in `todo.md`
 
 ## 🚀 CI/CD Pipeline
 
 ### GitHub Actions Workflow
 
-Our CI/CD pipeline (`.github/workflows/ci.yml`) automatically:
+The CI/CD pipeline (`.github/workflows/test.yml`) automatically:
 
 1. **Test Node.js** - Runs Jest tests with coverage
-2. **Test Python** - Runs pytest with coverage  
+2. **Code Quality** - ESLint and Prettier validation
 3. **API Testing** - Validates endpoints with Newman
-4. **Code Quality** - ESLint, Prettier, Black formatting
-5. **Sync Management** - Updates GitHub issues from todos
-6. **Deploy** - Pushes to Twilio on merge to main
 
 ### Required GitHub Secrets
 
@@ -379,178 +340,72 @@ The `GITHUB_TOKEN` is automatically provided by GitHub Actions.
 ### Deployment Environments
 
 - **Development**: `npm run twilio:deploy:dev`
-- **Production**: `npm run twilio:deploy:prod` (auto-deployed via CI/CD)
-
-## 🤖 AI Coding Agents Setup
-
-This template supports multiple AI coding assistants to maximize development productivity:
-
-### Supported AI Agents
-
-#### 1. **Claude Code** (Anthropic) - Primary Agent
-- **Best for**: Architecture, complex logic, test-driven development
-- **Setup**: Use this template directly with Claude Code CLI
-- **Configuration**: Pre-configured with `.github/CLAUDE.md`
-
-#### 2. **GitHub Copilot** (OpenAI)
-- **Best for**: Code completion, boilerplate generation, quick fixes  
-- **Setup**: Install VS Code extension `GitHub.copilot`
-- **Configuration**: Automatically works with VS Code workspace settings
-
-#### 3. **OpenAI Codex** (via API)
-- **Best for**: Custom integrations, automated code generation scripts
-- **Setup**: Add `OPENAI_API_KEY` to `.env` file
-- **Configuration**: Use in custom automation scripts
-
-#### 4. **Cursor AI** (Custom)
-- **Best for**: IDE-integrated AI assistance
-- **Setup**: Use Cursor IDE instead of VS Code
-- **Configuration**: Workspace settings template included
-
-### AI Agent Coordination Strategy
-
-**For Maximum Efficiency:**
-
-1. **Planning Phase**: Use Claude Code for architecture and specification
-2. **Implementation**: Use GitHub Copilot for rapid code completion
-3. **Testing**: Use Claude Code for comprehensive test generation
-4. **Debugging**: Use any agent for specific error resolution
-5. **Refactoring**: Use Claude Code for structural improvements
-
-### Environment Configuration
-
-Add AI agent credentials to your `.env` file:
-
-```bash
-# AI Coding Agents (Optional)
-OPENAI_API_KEY=your_openai_api_key_here
-ANTHROPIC_API_KEY=your_anthropic_api_key_here
-GITHUB_COPILOT_ENABLED=true
-CURSOR_AI_ENABLED=false
-```
-
-### VS Code Extensions for AI
-
-The setup script automatically configures these extensions:
-
-```json
-{
-  "recommendations": [
-    "GitHub.copilot",
-    "GitHub.copilot-chat", 
-    "ms-vscode.vscode-ai",
-    "Continue.continue",
-    "TabNine.tabnine-vscode"
-  ]
-}
-```
-
-### Agent-Specific Workflows
-
-#### Using Claude Code
-```bash
-# Start with specification and planning
-# Use .github/prompts/plan.md for structured planning
-# Follow TDD approach with comprehensive tests
-```
-
-#### Using GitHub Copilot  
-```bash
-# Enable in VS Code settings
-# Use for rapid code completion during implementation
-# Leverage chat feature for quick explanations
-```
-
-#### Using Multiple Agents
-```bash
-# 1. Plan with Claude Code
-# 2. Implement with Copilot completions  
-# 3. Test with Claude Code comprehensive tests
-# 4. Debug with any agent as needed
-```
-
-### AI Agent Best Practices
-
-- **Context Switching**: Use different agents for different types of tasks
-- **Validation**: Always run tests after AI-generated code
-- **Review**: Human review of all AI-generated critical functionality
-- **Iteration**: Use multiple agents to validate complex solutions
-
-## 🧠 Agent-Assisted Development
-
-### Prompt Templates
-
-Use these structured prompts in `.github/prompts/`:
-
-- `brainstorm.md` - Idea generation with chat models
-- `plan.md` - Create detailed implementation plans  
-- `tdd.md` - Test-driven development guidance
-- `code-review.md` - Code quality reviews
-- `do-issues.md` - GitHub issue management
-
-### Development Templates
-
-- `templates/spec.md` - Software specification template
-- `templates/prompt_plan.md` - Implementation planning template
-
-### Workflow Integration
-
-1. Generate ideas → `spec.md`
-2. Create implementation plan → `prompt_plan.md`  
-3. Break into tasks → `todo.md`
-4. Follow TDD cycle
-5. Sync progress with GitHub Issues
-6. Deploy via CI/CD
+- **Production**: `npm run twilio:deploy:prod`
 
 ## 📁 Project Structure
 
 ```
-vibe-clauding/
+twilio-synthetic-call-data-generator/
 ├── .github/
-│   ├── workflows/ci.yml        # CI/CD pipeline
-│   ├── prompts/               # Agent prompt templates
-│   └── CLAUDE.md              # Claude Code configuration
-├── functions/                 # Twilio Functions
-│   ├── hello.js              # Voice TTS example
-│   └── voice-menu.js         # Voice menu handling
-├── scripts/                  # Automation utilities
-│   ├── setup.js              # Development setup
-│   ├── create-github-issue.js # Issue creation
-│   └── sync-todos.js         # Todo-issue sync
-├── tests/                    # Test files
-├── templates/               # Project templates
-├── postman/                 # API test collections
-├── package.json             # Node.js dependencies & scripts
-├── pyproject.toml          # Python dependencies & config
-├── jest.config.js          # Jest test configuration
-├── newman.config.json      # Newman API test config
-└── README.md              # This file
+│   ├── workflows/test.yml      # CI/CD pipeline
+│   ├── ISSUE_TEMPLATE/        # Bug/feature templates
+│   └── PULL_REQUEST_TEMPLATE.md
+├── functions/                 # Twilio Serverless Functions
+│   ├── voice-handler.js      # Conference participant routing
+│   ├── transcribe.js         # Speech-to-text capture
+│   ├── respond.js           # OpenAI response generation
+│   ├── conference-status-webhook.js
+│   ├── transcription-webhook.js
+│   └── utils/               # Shared utilities
+├── src/                     # Core application
+│   ├── main.js             # Entry point
+│   ├── personas/           # Customer/agent loaders
+│   ├── pairing/            # Pairing strategies
+│   ├── orchestration/      # Conference creation
+│   └── segment/            # CDP integration
+├── scripts/                # Deployment & validation
+│   ├── pre-deployment-check.js
+│   ├── post-deployment-validation.js
+│   └── smoke-test.js
+├── tests/                  # 634 tests (unit/integration/e2e)
+├── docs/                   # Documentation
+├── postman/               # API test collections
+├── customers.json         # Customer personas
+├── package.json          # Dependencies & scripts
+└── README.md            # This file
 ```
 
 ## 🎯 Example Use Cases
 
-### Voice Application Development
+### Generate Test Data for Analytics Pipeline
 ```bash
-# Clone and setup
-git clone <repo> && cd vibe-clauding && npm run setup
+# Generate 100 synthetic calls with random pairing
+node scripts/generate-bulk-calls.js --count 100 --cps 1
 
-# Create voice function (TDD approach)
-# 1. Write test in tests/my-function.test.js
-# 2. Write function in functions/my-function.js  
-# 3. Test locally: npm run dev
-# 4. Deploy: npm run twilio:deploy
+# Results: Recordings, transcripts, Voice Intelligence insights
+# → Feeds into Segment CDP → Data warehouse → BI tools
 ```
 
-### Team Task Management
+### Train ML Models on Customer Service Data
 ```bash
-# Add tasks to todo.md
-echo "- [ ] Implement user authentication" >> todo.md
+# Generate diverse scenarios (frustrated + inexperienced agent, etc.)
+npm run start  # Creates random pairings
 
-# Sync with GitHub Issues
-npm run sync-todos
+# Extract Voice Intelligence operator results
+# → Sentiment analysis, PII detection, call classification
+# → Use for supervised ML training data
+```
 
-# Mark completed in todo.md
-# Issues automatically close via CI/CD
+### Test Voice Application Changes
+```bash
+# Deploy new TwiML function
+npm run deploy
+
+# Validate with E2E tests
+npm run smoke-test
+
+# Generate synthetic calls to test behavior
+node src/main.js
 ```
 
 ## 🤝 Contributing
