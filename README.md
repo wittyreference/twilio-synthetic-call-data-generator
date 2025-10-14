@@ -1,6 +1,6 @@
 # Twilio Synthetic Call Data Generator
 
-A production-grade system for generating realistic synthetic call data using Twilio Programmable Voice and Segment CDP. Features intelligent customer-agent pairing, AI-powered conversations with OpenAI, Voice Intelligence transcription, and ML-based customer profiling with churn risk and propensity scores.
+A production-grade system for generating realistic synthetic call data using Twilio Programmable Voice and Segment CDP. Features random customer-agent pairing for realistic scenarios (including challenging interactions), AI-powered conversations with OpenAI, Voice Intelligence transcription, and ML-based customer profiling with churn risk and propensity scores.
 
 **Architecture**: Built with production-grade patterns including comprehensive test coverage for core TwiML functions, retry logic with exponential backoff, circuit breakers, and webhook signature validation.
 
@@ -8,7 +8,7 @@ A production-grade system for generating realistic synthetic call data using Twi
 
 Generates realistic synthetic call data for testing, development, and analytics:
 
-1. **Intelligent Pairing** - Matches customers with agents based on issue complexity and skills
+1. **Random Pairing** - Creates realistic scenarios including challenging interactions (frustrated customers with inexperienced agents)
 2. **AI Conversations** - OpenAI-powered realistic agent-customer conversations with Voice Intelligence transcription
 3. **Customer Profiling** - Creates and updates Segment CDP profiles with ML scores
 4. **ML Analytics** - Calculates churn risk, propensity to buy, and satisfaction scores
@@ -19,7 +19,7 @@ Generates realistic synthetic call data for testing, development, and analytics:
 ✅ **One-Command Deployment** - Pre-deployment checks + deploy + post-deployment validation
 ✅ **Production Testing** - Smoke tests against real Twilio and Segment APIs
 ✅ **Comprehensive Test Coverage** - 634 tests across unit, integration, and E2E
-✅ **Intelligent Pairing** - Frustrated customers → experienced agents
+✅ **Realistic Pairing** - Random customer-agent matching creates diverse, realistic scenarios
 ✅ **Segment CDP Integration** - Automatic profile creation and ML score updates
 ✅ **Twilio Serverless** - Conference webhooks and AI conversation orchestration  
 
@@ -132,10 +132,15 @@ node src/main.js
 ```
 
 **What happens:**
-- Pairs a customer with an agent (intelligent matching)
+- Pairs a customer with an agent (random for realistic scenarios)
 - Creates Segment CDP profiles
 - Generates Twilio conference with AI conversation
 - Updates profiles with ML scores (churn risk, propensity, satisfaction)
+
+**Pairing Strategies** (configurable):
+- `random` (default) - Random pairing for diverse scenarios (frustrated customer + inexperienced agent = sparks fly! 🔥)
+- `frustrated` - Match difficult customers with experienced agents
+- `patient` - Patient customers with any agent
 
 ---
 
