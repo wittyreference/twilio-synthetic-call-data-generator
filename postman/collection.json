@@ -1,73 +1,106 @@
 {
   "info": {
-    "name": "Vibe Coding API Tests",
-    "description": "End-to-end API tests for the agent-assisted pipeline",
+    "name": "Twilio Synthetic Call Data Generator",
+    "description": "Postman collection for generating synthetic call data using Twilio Programmable Voice API with AI-powered customer and agent personas",
     "version": "1.0.0",
     "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
   },
+  "event": [
+    {
+      "listen": "prerequest",
+      "script": {
+        "type": "text/javascript",
+        "exec": [
+          "// Pre-request script: Select random customer and agent personas",
+          "",
+          "// Load customer personas (embedded from customers.json)",
+          "const customers = [",
+          "  pm.environment.get('customers') ? JSON.parse(pm.environment.get('customers')) : []",
+          "].flat();",
+          "",
+          "// Load agent personas (embedded from agents.json)",
+          "const agents = [",
+          "  pm.environment.get('agents') ? JSON.parse(pm.environment.get('agents')) : []",
+          "].flat();",
+          "",
+          "// Select random customer",
+          "if (customers.length > 0) {",
+          "  const randomCustomer = customers[Math.floor(Math.random() * customers.length)];",
+          "  pm.environment.set('customerName', randomCustomer.CustomerName);",
+          "  pm.environment.set('customerPhone', randomCustomer.PhoneNumber);",
+          "  pm.environment.set('customerIssue', randomCustomer.Issue);",
+          "  pm.environment.set('customerPrompt', randomCustomer.Prompt);",
+          "  console.log('Selected customer:', randomCustomer.CustomerName);",
+          "}",
+          "",
+          "// Select random agent",
+          "if (agents.length > 0) {",
+          "  const randomAgent = agents[Math.floor(Math.random() * agents.length)];",
+          "  pm.environment.set('agentName', randomAgent.AgentName);",
+          "  pm.environment.set('agentIntroduction', randomAgent.ScriptedIntroduction);",
+          "  pm.environment.set('agentCharacteristics', randomAgent.Characteristics);",
+          "  console.log('Selected agent:', randomAgent.AgentName);",
+          "}"
+        ]
+      }
+    }
+  ],
   "item": [
     {
-      "name": "Health Check",
+      "name": "Create Conference",
       "event": [
         {
           "listen": "test",
           "script": {
+            "type": "text/javascript",
             "exec": [
-              "pm.test('Status code is 200', function () {",
-              "    pm.response.to.have.status(200);",
+              "pm.test('Status code is 201 Created', function () {",
+              "    pm.response.to.have.status(201);",
               "});",
               "",
-              "pm.test('Response time is less than 2000ms', function () {",
-              "    pm.expect(pm.response.responseTime).to.be.below(2000);",
+              "pm.test('Response has conference SID', function () {",
+              "    const jsonData = pm.response.json();",
+              "    pm.expect(jsonData).to.have.property('conferenceSid');",
+              "    pm.expect(jsonData.conferenceSid).to.match(/^CF[a-f0-9]{32}$/);",
+              "    ",
+              "    // Save for subsequent requests",
+              "    pm.environment.set('conferenceSid', jsonData.conferenceSid);",
+              "    pm.environment.set('conferenceId', jsonData.conferenceId);",
               "});",
               "",
-              "pm.test('Content-Type is application/json', function () {",
-              "    pm.expect(pm.response.headers.get('Content-Type')).to.include('application/json');",
+              "pm.test('Response includes customer and agent participants', function () {",
+              "    const jsonData = pm.response.json();",
+              "    pm.expect(jsonData).to.have.property('customer');",
+              "    pm.expect(jsonData).to.have.property('agent');",
+              "    pm.expect(jsonData.customer).to.have.property('participantSid');",
+              "    pm.expect(jsonData.agent).to.have.property('participantSid');",
+              "});",
+              "",
+              "pm.test('Timer is scheduled', function () {",
+              "    const jsonData = pm.response.json();",
+              "    pm.expect(jsonData.timerScheduled).to.be.true;",
+              "    pm.expect(jsonData.timerDuration).to.equal(300);",
               "});"
-            ],
-            "type": "text/javascript"
+            ]
           }
         }
       ],
       "request": {
-        "method": "GET",
-        "header": [],
-        "url": {
-          "raw": "{{base_url}}/health",
-          "host": [
-            "{{base_url}}"
-          ],
-          "path": [
-            "health"
+        "auth": {
+          "type": "basic",
+          "basic": [
+            {
+              "key": "username",
+              "value": "{{TWILIO_ACCOUNT_SID}}",
+              "type": "string"
+            },
+            {
+              "key": "password",
+              "value": "{{TWILIO_AUTH_TOKEN}}",
+              "type": "string"
+            }
           ]
-        }
-      }
-    },
-    {
-      "name": "Twilio Webhook Test",
-      "event": [
-        {
-          "listen": "test",
-          "script": {
-            "exec": [
-              "pm.test('Status code is 200', function () {",
-              "    pm.response.to.have.status(200);",
-              "});",
-              "",
-              "pm.test('Response contains TwiML', function () {",
-              "    pm.expect(pm.response.text()).to.include('<?xml version=\"1.0\" encoding=\"UTF-8\"?>');",
-              "});",
-              "",
-              "pm.test('Response contains valid TwiML Response', function () {",
-              "    pm.expect(pm.response.text()).to.include('<Response>');",
-              "    pm.expect(pm.response.text()).to.include('</Response>');",
-              "});"
-            ],
-            "type": "text/javascript"
-          }
-        }
-      ],
-      "request": {
+        },
         "method": "POST",
         "header": [
           {
@@ -79,101 +112,135 @@
           "mode": "urlencoded",
           "urlencoded": [
             {
-              "key": "From",
-              "value": "{{test_phone_number}}",
+              "key": "agentPhoneNumber",
+              "value": "{{AGENT_PHONE_NUMBER}}",
               "type": "text"
             },
             {
-              "key": "To",
-              "value": "{{twilio_phone_number}}",
-              "type": "text"
-            },
-            {
-              "key": "Body",
-              "value": "test message",
+              "key": "strategy",
+              "value": "random",
               "type": "text"
             }
           ]
         },
         "url": {
-          "raw": "{{base_url}}/webhook",
-          "host": [
-            "{{base_url}}"
-          ],
-          "path": [
-            "webhook"
-          ]
-        }
+          "raw": "{{BASE_URL}}/create-conference",
+          "host": ["{{BASE_URL}}"],
+          "path": ["create-conference"]
+        },
+        "description": "Creates a new Twilio conference with randomly selected customer and agent personas"
       }
     },
     {
-      "name": "API Error Handling",
+      "name": "Get Conference Status",
       "event": [
         {
           "listen": "test",
           "script": {
+            "type": "text/javascript",
             "exec": [
-              "pm.test('Status code is 400 or 404', function () {",
-              "    pm.expect([400, 404]).to.include(pm.response.code);",
+              "pm.test('Status code is 200 OK', function () {",
+              "    pm.response.to.have.status(200);",
               "});",
               "",
-              "pm.test('Response contains error message', function () {",
-              "    const response = pm.response.json();",
-              "    pm.expect(response).to.have.property('error');",
-              "});",
-              "",
-              "pm.test('Response time is acceptable', function () {",
-              "    pm.expect(pm.response.responseTime).to.be.below(3000);",
+              "pm.test('Response has conference details', function () {",
+              "    const jsonData = pm.response.json();",
+              "    pm.expect(jsonData).to.have.property('sid');",
+              "    pm.expect(jsonData).to.have.property('status');",
+              "    pm.expect(jsonData).to.have.property('friendlyName');",
               "});"
-            ],
-            "type": "text/javascript"
+            ]
           }
         }
       ],
       "request": {
+        "auth": {
+          "type": "basic",
+          "basic": [
+            {
+              "key": "username",
+              "value": "{{TWILIO_ACCOUNT_SID}}",
+              "type": "string"
+            },
+            {
+              "key": "password",
+              "value": "{{TWILIO_AUTH_TOKEN}}",
+              "type": "string"
+            }
+          ]
+        },
         "method": "GET",
         "header": [],
         "url": {
-          "raw": "{{base_url}}/nonexistent-endpoint",
-          "host": [
-            "{{base_url}}"
-          ],
-          "path": [
-            "nonexistent-endpoint"
-          ]
-        }
-      }
-    }
-  ],
-  "event": [
-    {
-      "listen": "prerequest",
-      "script": {
-        "exec": [
-          "// Global pre-request script",
-          "console.log('Running test collection: ' + pm.info.requestName);"
-        ],
-        "type": "text/javascript"
+          "raw": "https://api.twilio.com/2010-04-01/Accounts/{{TWILIO_ACCOUNT_SID}}/Conferences/{{conferenceSid}}.json",
+          "protocol": "https",
+          "host": ["api", "twilio", "com"],
+          "path": ["2010-04-01", "Accounts", "{{TWILIO_ACCOUNT_SID}}", "Conferences", "{{conferenceSid}}.json"]
+        },
+        "description": "Retrieves the status of a conference created in the previous request"
       }
     },
     {
-      "listen": "test",
-      "script": {
-        "exec": [
-          "// Global test script",
-          "pm.test('Response received within acceptable time', function () {",
-          "    pm.expect(pm.response.responseTime).to.be.below(5000);",
-          "});"
+      "name": "Terminate Conference",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('Status code is 200 OK', function () {",
+              "    pm.response.to.have.status(200);",
+              "});",
+              "",
+              "pm.test('Conference was terminated', function () {",
+              "    const jsonData = pm.response.json();",
+              "    pm.expect(jsonData.success).to.be.true;",
+              "    pm.expect(jsonData.action).to.equal('terminated');",
+              "});"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "auth": {
+          "type": "basic",
+          "basic": [
+            {
+              "key": "username",
+              "value": "{{TWILIO_ACCOUNT_SID}}",
+              "type": "string"
+            },
+            {
+              "key": "password",
+              "value": "{{TWILIO_AUTH_TOKEN}}",
+              "type": "string"
+            }
+          ]
+        },
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/x-www-form-urlencoded"
+          }
         ],
-        "type": "text/javascript"
+        "body": {
+          "mode": "urlencoded",
+          "urlencoded": [
+            {
+              "key": "ConferenceSid",
+              "value": "{{conferenceSid}}",
+              "type": "text"
+            }
+          ]
+        },
+        "url": {
+          "raw": "{{BASE_URL}}/conference-timer",
+          "host": ["{{BASE_URL}}"],
+          "path": ["conference-timer"]
+        },
+        "description": "Terminates the conference by updating its status to completed"
       }
-    }
-  ],
-  "variable": [
-    {
-      "key": "base_url",
-      "value": "https://your-serverless-functions-domain.twil.io/dev",
-      "type": "string"
     }
   ]
 }

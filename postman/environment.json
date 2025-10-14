@@ -1,36 +1,59 @@
 {
-  "id": "test-environment",
-  "name": "Test Environment",
+  "name": "Twilio Synthetic Generator",
   "values": [
     {
-      "key": "base_url",
-      "value": "https://your-serverless-functions-domain.twil.io/dev",
-      "enabled": true,
-      "type": "default"
+      "key": "TWILIO_ACCOUNT_SID",
+      "value": "{{$processEnvironment TWILIO_ACCOUNT_SID}}",
+      "type": "default",
+      "enabled": true
     },
     {
-      "key": "test_phone_number",
-      "value": "+15551234567",
-      "enabled": true,
-      "type": "default"
+      "key": "TWILIO_AUTH_TOKEN",
+      "value": "{{$processEnvironment TWILIO_AUTH_TOKEN}}",
+      "type": "secret",
+      "enabled": true
     },
     {
-      "key": "twilio_phone_number",
-      "value": "+15559876543",
-      "enabled": true,
-      "type": "default"
+      "key": "AGENT_PHONE_NUMBER",
+      "value": "{{$processEnvironment AGENT_PHONE_NUMBER}}",
+      "type": "default",
+      "enabled": true
     },
     {
-      "key": "account_sid",
-      "value": "AC_test_account_sid",
-      "enabled": true,
-      "type": "secret"
+      "key": "BASE_URL",
+      "value": "https://vibe-clauding-8464-dev.twil.io",
+      "type": "default",
+      "enabled": true
     },
     {
-      "key": "auth_token",
-      "value": "test_auth_token",
-      "enabled": true,
-      "type": "secret"
+      "key": "conferenceSid",
+      "value": "",
+      "type": "default",
+      "enabled": true
+    },
+    {
+      "key": "conferenceId",
+      "value": "",
+      "type": "default",
+      "enabled": true
+    },
+    {
+      "key": "customerName",
+      "value": "",
+      "type": "default",
+      "enabled": true
+    },
+    {
+      "key": "customerPhone",
+      "value": "",
+      "type": "default",
+      "enabled": true
+    },
+    {
+      "key": "agentName",
+      "value": "",
+      "type": "default",
+      "enabled": true
     }
   ],
   "_postman_variable_scope": "environment"

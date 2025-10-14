@@ -49,7 +49,7 @@ class TodoSyncer {
 
       // Match completed todos: - [x] or - [X]
       const completedMatch = line.match(
-        /^[\s]*[-*]?\s*\d*\.?\s*\[x|X\]\s*(.+)$/
+        /^[\s]*[-*]?\s*\d*\.?\s*\[[xX]\]\s*(.+)$/
       );
       if (completedMatch) {
         todos.push({
@@ -143,7 +143,7 @@ class TodoSyncer {
           console.log(`✅ Marked todo as completed: ${matchingTodo.title}`);
         } else if (shouldBeIncomplete) {
           newLines[matchingTodo.lineNumber] = matchingTodo.originalLine.replace(
-            /\[x|X\]/,
+            /\[[xX]\]/,
             '[ ]'
           );
           hasChanges = true;

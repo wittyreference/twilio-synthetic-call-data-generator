@@ -78,3 +78,17 @@ Thumbs.db
 # Temporary files
 tmp/
 temp/
+
+# Chat logs
+chat_logs/
+
+# Internal development files (not for public repo)
+prompt_plan.md
+spec.md
+todo.md
+CLAUDE.md
+templates/
+.twiliodeployinfo
+
+# Agent configuration
+agents.json

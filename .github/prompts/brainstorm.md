@@ -3,3 +3,15 @@ Ask me one question at a time so we can develop a thorough, step-by-step spec fo
 Once we are done, save the spec as spec.md
 
 Here’s the idea:
+
+I want to create an end-to-end synthetic call data generator using Twilio Programmable Voice. I want the call flow to use Twilio's /Participants API to add participants to a conference. I would like to have two AI-powered participants on each call who will interact with each other in a natural-sounding way. I would like for one participant to be a customer and other to be a customer service representative. I would like to have an array of different customer and agent identities, say 10 of each, including names, demeanors, etc. Some customers should be happy, some should be frustrated, and some should be neutral. The agents should also have different styles of interaction, such as empathetic, assertive, technical, frustrated, short, unhelpful, antagonistic, etc. There should also be an array of different scenarios that the AI participants can discuss, such as billing issues, technical support, product inquiries, etc. Each customer should be identifiable by the Twilio number they are "calling" from, and it should remain associated with that identity and that identity only. When generating the calls, the pairs of customers and agents should be randomized to maximize the number of unique pairings and demeanors. The AI should be able to generate realistic dialogue based on the identities and scenarios provided. I would like to use Twilio's ConversationRelay to manage the AI participants' interactions and ensure they can communicate effectively within the conference call for the purposes of generating realistic call data.
+
+The calls should be recorded, those recordings should be transcribed using Conversational Intelligence services, and we should define both pre-built and generative Language Operators to analyze and synthesize insights from the transcriptions.
+
+We will need to stand up a webhook using Twilio Functions to receive status callsbacks for calls, conferences, recordings, and transcriptions.
+
+We also want to ensure we are capturing and instrumenting Voice Insights and Conference Insights data for analysis. I would like to send these to an AWS kinesis stream for further processing and analysis using Twilio Event Streams. 
+
+Assume we want to generate thousands of these calls per day. Assume we need to handle scaling, error handling, retries, and monitoring. Assume we need to send these to a Twilio Segment workspace for creating and updating user profiles based on call interactions. This means that the "customer" AI participant should have a persistent identity across calls, and their disposition should be consistent. If they are annoyed in one call, they should carry that disposition into the next call.
+
+The overall goal is to create a robust system that can generate large volumes of realistic call data for testing and pipeline validation purposes. The idea is to allow developers to be able to easily create, manage, and analyze synthetic call data that mimics real-world customer service interactions.

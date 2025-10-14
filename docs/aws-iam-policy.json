@@ -1,0 +1,32 @@
+{
+  "Version": "2012-10-17",
+  "Statement": [
+    {
+      "Sid": "TwilioEventBridgePutEvents",
+      "Effect": "Allow",
+      "Action": [
+        "events:PutEvents"
+      ],
+      "Resource": [
+        "arn:aws:events:*:*:event-bus/twilio-call-events"
+      ],
+      "Condition": {
+        "StringEquals": {
+          "events:source": [
+            "aws.partner/twilio.com"
+          ]
+        }
+      }
+    },
+    {
+      "Sid": "TwilioEventBridgeDescribe",
+      "Effect": "Allow",
+      "Action": [
+        "events:DescribeEventBus"
+      ],
+      "Resource": [
+        "arn:aws:events:*:*:event-bus/twilio-call-events"
+      ]
+    }
+  ]
+}
