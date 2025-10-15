@@ -36,6 +36,8 @@
     "validate:env": "node scripts/validate-env-example.js",
     "validate:env:example": "node scripts/validate-env-example.js --example",
     "validate:env:current": "node scripts/validate-env-example.js --env",
+    "validate:transcriptions": "node scripts/validate-transcriptions.js",
+    "validate:transcriptions:verbose": "node scripts/validate-transcriptions.js --verbose",
     "smoke-test": "node scripts/smoke-test.js",
     "pre-deploy": "node scripts/pre-deployment-check.js",
     "post-deploy": "node scripts/post-deployment-validation.js",
