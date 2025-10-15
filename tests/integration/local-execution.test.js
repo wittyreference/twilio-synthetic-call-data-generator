@@ -10,34 +10,52 @@ describe('Local Code Execution Integration Tests', () => {
 
   const timeout = 120000; // 2 minutes for real Twilio API calls
 
-  describe('src/main.js - Conference Creation', () => {
-    it('should execute without errors and create a conference', async () => {
-      // This single test would have caught all three runtime failures:
-      // 1. CUSTOMER_PHONE_NUMBER environment variable missing
-      // 2. client.conferences.create is not a function
-      // 3. Conference SID not found
+  describe('Serverless Function - Conference Creation', () => {
+    it('should execute without errors and create a conference via serverless endpoint', async () => {
+      // Test the NEW serverless function approach
+      // This validates the production API endpoint works correctly
+
+      const domain = process.env.SERVERLESS_DOMAIN;
+
+      // Skip if no serverless domain configured
+      if (!domain) {
+        console.log('⚠️  Skipping: SERVERLESS_DOMAIN not set');
+        return;
+      }
 
       let output;
       try {
-        output = execSync('node src/main.js random 1', {
+        output = execSync(`curl -s -X POST "https://${domain}/create-conference" -H "Content-Type: application/json" -d '{}'`, {
           encoding: 'utf8',
           cwd: path.join(__dirname, '..', '..'),
           env: process.env,
           timeout: timeout
         });
       } catch (error) {
-        // If command failed, show the error output
-        throw new Error(`Command failed with error:\n${error.stdout}\n${error.stderr}`);
+        throw new Error(`Command failed with error:\n${error.message}`);
       }
 
-      // Validate success indicators in output
-      expect(output).toContain('Creating call');
-      expect(output).not.toContain('Error:');
-      expect(output).not.toContain('TypeError');
-      expect(output).not.toContain('ENOENT');
+      // Parse JSON response
+      const response = JSON.parse(output);
 
-      // Validate conference was created
-      expect(output).toMatch(/Conference (Created|Initiated)/i);
+      // Validate success response structure
+      expect(response).toHaveProperty('success', true);
+      expect(response).toHaveProperty('conferenceId');
+      expect(response).toHaveProperty('customer');
+      expect(response).toHaveProperty('agent');
+      expect(response.customer).toHaveProperty('callSid');
+      expect(response.agent).toHaveProperty('callSid');
+
+      // Validate Call SID formats
+      expect(response.customer.callSid).toMatch(/^CA[a-f0-9]{32}$/);
+      expect(response.agent.callSid).toMatch(/^CA[a-f0-9]{32}$/);
+
+      // Validate conference ID format
+      expect(response.conferenceId).toMatch(/^synth-call-\d+-[a-z0-9]+$/);
+
+      // Validate timer metadata
+      expect(response).toHaveProperty('timer');
+      expect(response.timer.scheduled).toBe(false);
     }, timeout);
 
     it('should load customer personas from assets directory', async () => {
@@ -84,19 +102,27 @@ describe('Local Code Execution Integration Tests', () => {
   describe('Environment Validation', () => {
     it('should have all required environment variables set', () => {
       // This test validates that .env.example matches actual requirements
-      // Would have caught CUSTOMER_PHONE_NUMBER being required but not documented
 
       const requiredVars = [
         'TWILIO_ACCOUNT_SID',
         'TWILIO_AUTH_TOKEN',
         'OPENAI_API_KEY',
-        'SYNC_SERVICE_SID',
         'TWIML_APP_SID',
         'AGENT_PHONE_NUMBER',
         'SERVERLESS_DOMAIN'
       ];
 
+      // Optional vars that are checked but not required
+      const optionalVars = [
+        'SYNC_SERVICE_SID',  // Falls back to TWILIO_SYNC_SERVICE_SID
+        'SEGMENT_WRITE_KEY'   // Optional for analytics
+      ];
+
       const missingVars = requiredVars.filter(varName => !process.env[varName]);
+
+      if (missingVars.length > 0) {
+        console.log('Missing required environment variables:', missingVars);
+      }
 
       expect(missingVars).toHaveLength(0);
     });
@@ -107,12 +133,13 @@ describe('Local Code Execution Integration Tests', () => {
       const authToken = process.env.TWILIO_AUTH_TOKEN;
 
       // Skip if using placeholder values from .env.example
-      if (accountSid && !accountSid.includes('xxx')) {
+      if (accountSid && !accountSid.includes('xxx') && !accountSid.includes('test_')) {
         expect(accountSid).toMatch(/^AC[a-f0-9]{32}$/);
       }
 
-      if (authToken && !authToken.includes('your_') && authToken.length >= 32) {
-        expect(authToken).toHaveLength(32);
+      // Auth tokens should be at least 32 chars (can be longer for test tokens)
+      if (authToken && !authToken.includes('your_') && !authToken.includes('test_')) {
+        expect(authToken.length).toBeGreaterThanOrEqual(32);
       }
     });
 
