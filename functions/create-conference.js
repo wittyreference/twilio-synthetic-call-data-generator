@@ -146,6 +146,10 @@ async function addParticipantToConference(
       earlyMedia: true,
       endConferenceOnExit: false,
       beep: false,
+      record: true, // Enable recording
+      recordingStatusCallback: `https://${context.DOMAIN_NAME}/transcription-webhook`,
+      recordingStatusCallbackEvent: ['completed'],
+      recordingStatusCallbackMethod: 'POST',
       statusCallback: `https://${context.DOMAIN_NAME}/conference-status-webhook`,
       statusCallbackEvent: ['initiated', 'ringing', 'answered', 'completed'],
       statusCallbackMethod: 'POST',
@@ -155,19 +159,27 @@ async function addParticipantToConference(
   return participantObj.callSid;
 }
 
-// Schedule conference termination
-async function scheduleConferenceTermination(context, conferenceId) {
+// Note: Conference auto-termination
+// Conferences will run until natural completion (customer or agent hangs up)
+// For manual termination after 5 minutes, call the conference-timer endpoint:
+// POST https://DOMAIN/conference-timer with {"ConferenceSid": "CFXXXX"}
+//
+// To implement auto-termination, use an external scheduler service (AWS EventBridge,
+// Zapier, etc.) to call the timer endpoint 5 minutes after conference creation
+async function scheduleConferenceTermination(context, conferenceId, client) {
   const timerUrl = `https://${context.DOMAIN_NAME}/conference-timer`;
+  const delayMs = 5 * 60 * 1000; // 5 minutes
 
-  console.log(`Scheduling 5-minute timer for conference ${conferenceId}`);
+  console.log(`Conference ${conferenceId} will run until natural completion`);
+  console.log(`To manually terminate, call: ${timerUrl}?ConferenceSid=${conferenceId}`);
 
-  // In production, use external scheduler or setTimeout
-  // For now, log the timer URL that should be called
+  // Return metadata for reference
   return {
-    scheduled: true,
+    scheduled: false,
+    note: 'Auto-termination requires external scheduler service',
     timerUrl: timerUrl,
     conferenceId: conferenceId,
-    terminateAt: new Date(Date.now() + 5 * 60 * 1000).toISOString(),
+    suggestedTerminateAt: new Date(Date.now() + delayMs).toISOString(),
   };
 }
 
@@ -215,7 +227,7 @@ exports.handler = async function (context, event, callback) {
     );
 
     // Schedule 5-minute termination
-    const timer = await scheduleConferenceTermination(context, conferenceId);
+    const timer = await scheduleConferenceTermination(context, conferenceId, twilioClient);
 
     const result = {
       success: true,
