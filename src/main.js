@@ -4,13 +4,13 @@
 require('dotenv').config();
 const twilio = require('twilio');
 const { createConference } = require('./orchestration/conference-orchestrator');
+const { loadCustomers } = require('./personas/customer-loader');
 
 // Load environment variables
 const accountSid = process.env.TWILIO_ACCOUNT_SID;
 const authToken = process.env.TWILIO_AUTH_TOKEN;
 const twimlAppSid = process.env.TWIML_APP_SID;
 const agentPhoneNumber = process.env.AGENT_PHONE_NUMBER;
-const customerPhoneNumber = process.env.CUSTOMER_PHONE_NUMBER;
 
 // Validate required environment variables
 if (!accountSid || !authToken) {
@@ -28,48 +28,65 @@ if (!agentPhoneNumber) {
   process.exit(1);
 }
 
-if (!customerPhoneNumber) {
-  console.error('❌ Error: CUSTOMER_PHONE_NUMBER must be set in .env');
-  process.exit(1);
-}
+// Load customers from assets/customers.json to get phone numbers
+const customers = loadCustomers();
 
 const client = twilio(accountSid, authToken);
 
 // Main conference creation function
-async function createSyntheticConference(strategy = 'random') {
+async function createSyntheticConference(strategy = 'random', numCalls = 1) {
   console.log('\n╔════════════════════════════════════════════════════════════╗');
   console.log('║  🎬 SYNTHETIC CONFERENCE CREATION                        ║');
   console.log('╚════════════════════════════════════════════════════════════╝\n');
+
+  const results = [];
 
   try {
     console.log(`📋 Configuration:`);
     console.log(`   TwiML App SID: ${twimlAppSid}`);
     console.log(`   Agent Phone: ${agentPhoneNumber}`);
-    console.log(`   Customer Phone: ${customerPhoneNumber}`);
+    console.log(`   Number of Calls: ${numCalls}`);
     console.log(`   Pairing Strategy: ${strategy}\n`);
 
-    console.log('🎲 Creating conference with AI-powered participants...\n');
+    for (let i = 0; i < numCalls; i++) {
+      // Select a random customer from the loaded customers
+      const customer = customers[Math.floor(Math.random() * customers.length)];
+      const customerPhoneNumber = customer.PhoneNumber;
 
-    // Use conference orchestrator to create conference
-    const result = await createConference(
-      client,
-      twimlAppSid,
-      agentPhoneNumber,
-      customerPhoneNumber,
-      { strategy }
-    );
+      console.log(`\n🎲 Creating call ${i + 1}/${numCalls} with customer: ${customer.CustomerName}...\n`);
+
+      // Use conference orchestrator to create conference
+      const result = await createConference(
+        client,
+        twimlAppSid,
+        agentPhoneNumber,
+        customerPhoneNumber,
+        { strategy }
+      );
+
+      results.push(result);
+
+      // Add a small delay between calls to avoid rate limiting
+      if (i < numCalls - 1) {
+        console.log('\n⏳ Waiting 3 seconds before next call...\n');
+        await new Promise(resolve => setTimeout(resolve, 3000));
+      }
+    }
 
     console.log('\n════════════════════════════════════════════════════════════');
-    console.log('  ✅ Conference Created Successfully!');
+    console.log(`  ✅ ${numCalls} Conference${numCalls > 1 ? 's' : ''} Created Successfully!`);
     console.log('════════════════════════════════════════════════════════════\n');
 
-    console.log('📊 Conference Details:');
-    console.log(`   Conference SID: ${result.conferenceSid}`);
-    console.log(`   Conference ID: ${result.conferenceId}`);
-    console.log(`   Customer: ${result.customer.customerName} (${result.customer.participantSid})`);
-    console.log(`   Agent: ${result.agent.agentName} (${result.agent.participantSid})`);
-    console.log(`   Timer: ${result.timerScheduled ? `${result.timerDuration}s` : 'Not scheduled'}`);
-    console.log(`   Created: ${result.timestamp}\n`);
+    console.log('📊 Conference Details:\n');
+    results.forEach((result, index) => {
+      console.log(`   Call ${index + 1}:`);
+      console.log(`      Conference SID: ${result.conferenceSid}`);
+      console.log(`      Conference ID: ${result.conferenceId}`);
+      console.log(`      Customer: ${result.customer.customerName} (${result.customer.participantSid})`);
+      console.log(`      Agent: ${result.agent.agentName} (${result.agent.participantSid})`);
+      console.log(`      Timer: ${result.timerScheduled ? `${result.timerDuration}s` : 'Not scheduled'}`);
+      console.log(`      Created: ${result.timestamp}\n`);
+    });
 
     console.log('🔊 Conversation Flow:');
     console.log('   1. Voice Handler → Entry point for TwiML Application');
@@ -81,11 +98,9 @@ async function createSyntheticConference(strategy = 'random') {
     console.log(`   Conferences: https://console.twilio.com/us1/monitor/logs/conferences`);
     console.log(`   Calls: https://console.twilio.com/us1/monitor/logs/calls\n`);
 
-    console.log('⏰ Conference will auto-terminate in 5 minutes');
-    console.log('   You can also manually terminate with:');
-    console.log(`   twilio api:core:conferences:update --sid ${result.conferenceSid} --status completed\n`);
+    console.log('⏰ Conferences will auto-terminate in 5 minutes');
 
-    return result;
+    return results;
 
   } catch (error) {
     console.error('\n❌ Error creating conference:', error.message);
@@ -103,12 +118,12 @@ async function createSyntheticConference(strategy = 'random') {
 // Run if called directly
 if (require.main === module) {
   const strategy = process.argv[2] || 'random'; // Allow strategy as CLI argument
+  const numCalls = parseInt(process.argv[3]) || 1; // Allow number of calls as second CLI argument
 
-  createSyntheticConference(strategy)
-    .then((result) => {
-      console.log('✅ Conference created successfully!');
-      console.log('   Script will exit now. Conference will continue in Twilio.');
-      console.log(`   Monitor: https://console.twilio.com/us1/monitor/logs/conferences/${result.conferenceSid}\n`);
+  createSyntheticConference(strategy, numCalls)
+    .then((results) => {
+      console.log(`\n✅ ${results.length} conference${results.length > 1 ? 's' : ''} created successfully!`);
+      console.log('   Script will exit now. Conferences will continue in Twilio.\n');
       process.exit(0);
     })
     .catch(error => {

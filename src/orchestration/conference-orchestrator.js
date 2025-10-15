@@ -79,23 +79,10 @@ async function createConference(client, twimlAppSid, agentPhoneNumber, customerP
     console.log(`Selected pair: ${pair.customer.CustomerName} <-> ${pair.agent.AgentName}`);
     console.log(`Conference ID: ${conferenceId}`);
 
-    // Step 2: Create conference
-    console.log('Creating conference...');
-    const conference = await client.conferences.create({
-      friendlyName: conferenceId,
-      record: 'record-from-start',
-      recordingStatusCallback: '/conference-status-webhook',
-      recordingStatusCallbackMethod: 'POST',
-      statusCallback: '/conference-status-webhook',
-      statusCallbackMethod: 'POST',
-      beep: false,
-      startConferenceOnEnter: true,
-      endConferenceOnExit: false,
-      maxParticipants: 2,
-    });
-
-    conferenceSid = conference.sid;
-    console.log(`Conference created: ${conferenceSid}`);
+    // Step 2: Conference will be created automatically when first participant joins
+    // Use the conferenceId as the conference friendly name
+    conferenceSid = conferenceId;
+    console.log(`Conference will be created: ${conferenceSid}`);
 
     // Step 3: Add customer to conference
     console.log(`Adding customer ${pair.customer.CustomerName} to conference...`);
