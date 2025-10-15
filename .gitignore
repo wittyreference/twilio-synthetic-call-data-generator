@@ -90,6 +90,13 @@ templates/
 .twiliodeployinfo
 .github/prompts/
 
+# Internal documentation (lessons learned the hard way - keep private!)
+docs/POST-MORTEM.md
+docs/TESTING-STRATEGY.md
+docs/TESTING-SUMMARY.md
+docs/INTEGRATION-TESTS.md
+call-flow-report.md
+
 # Root-level persona files (use assets/ instead)
 /agents.json
 /customers.json
