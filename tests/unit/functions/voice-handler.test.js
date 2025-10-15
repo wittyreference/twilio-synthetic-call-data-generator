@@ -352,7 +352,7 @@ describe('Voice Handler Function', () => {
       );
     });
 
-    it('should log role, persona, and conferenceId', async () => {
+    it('should log role and persona in legacy mode', async () => {
       mockEvent = {
         role: 'customer',
         persona: 'John Doe',
@@ -368,7 +368,7 @@ describe('Voice Handler Function', () => {
         expect.stringContaining('John Doe')
       );
       expect(consoleLogSpy).toHaveBeenCalledWith(
-        expect.stringContaining('synth-123')
+        expect.stringContaining('(legacy)')
       );
     });
   });
