@@ -56,10 +56,10 @@ async function selectRandomPair(context, runtime) {
   return { customer, agent, conferenceId };
 }
 
-// Add participant to conference
-async function addParticipantToConference(
-  context,
+// Store participant data in Sync (avoids 800-char URL limit)
+async function storeParticipantDataInSync(
   client,
+  context,
   conferenceId,
   participant,
   role
@@ -71,6 +71,46 @@ async function addParticipantToConference(
   const systemPrompt = isAgent
     ? `${participant.ScriptedIntroduction}\n\nCharacteristics:\n- Response: ${participant.ResponseToIssue}\n- Competence: ${participant.CompetenceLevel}\n- Attitude: ${participant.Attitude}\n- Product knowledge: ${participant.ProductKnowledge}\n\n${participant.Characteristics}`
     : participant.Prompt;
+
+  const introduction = isAgent ? participant.ScriptedIntroduction : '';
+
+  const syncKey = `${conferenceId}_${role}`;
+
+  // Store in Sync
+  const syncServiceSid = context.SYNC_SERVICE_SID || context.TWILIO_SYNC_SERVICE_SID;
+
+  if (!syncServiceSid) {
+    throw new Error('SYNC_SERVICE_SID or TWILIO_SYNC_SERVICE_SID must be set in environment');
+  }
+
+  const syncDoc = await client.sync.v1
+    .services(syncServiceSid)
+    .documents.create({
+      uniqueName: syncKey,
+      data: {
+        role: role,
+        name: name,
+        systemPrompt: systemPrompt,
+        introduction: introduction,
+        participant: participant,
+      },
+      ttl: 3600, // 1 hour TTL
+    });
+
+  console.log(`Stored ${role} data in Sync: ${syncKey}`);
+  return syncKey;
+}
+
+// Add participant to conference
+async function addParticipantToConference(
+  context,
+  client,
+  conferenceId,
+  participant,
+  role
+) {
+  const isAgent = role === 'agent';
+  const name = isAgent ? participant.AgentName : participant.CustomerName;
 
   console.log(`Adding ${role}: ${name} to conference ${conferenceId}`);
 
@@ -88,13 +128,21 @@ async function addParticipantToConference(
     throw new Error('TWIML_APP_SID must be set in environment');
   }
 
-  const introduction = isAgent ? participant.ScriptedIntroduction : '';
+  // Store participant data in Sync to avoid 800-char URL limit
+  const syncKey = await storeParticipantDataInSync(
+    client,
+    context,
+    conferenceId,
+    participant,
+    role
+  );
 
+  // Pass only the reference key in URL (much shorter!)
   const participantObj = await client
     .conferences(conferenceId)
     .participants.create({
       from: twilioPhoneNumber,
-      to: `app:${twimlAppSid}?role=${role}&persona=${encodeURIComponent(name)}&conferenceId=${encodeURIComponent(conferenceId)}&systemPrompt=${encodeURIComponent(systemPrompt)}&introduction=${encodeURIComponent(introduction)}`,
+      to: `app:${twimlAppSid}?syncKey=${encodeURIComponent(syncKey)}`,
       earlyMedia: true,
       endConferenceOnExit: false,
       beep: false,

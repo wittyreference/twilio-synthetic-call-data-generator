@@ -12,35 +12,88 @@ exports.handler = async function (context, event, callback) {
   if (!validateOrReject(context, event, callback)) {
     return; // Validation failed, callback already called
   }
-  const twiml = new Twilio.twiml.VoiceResponse();
 
-  // Extract conversation parameters
-  const params = extractConversationParams(event);
+  try {
+    const twiml = new Twilio.twiml.VoiceResponse();
 
-  console.log(
-    `📞 Voice handler called for ${params.role}: ${params.persona} in conference ${params.conferenceId}`
-  );
+    // NEW: Check if we have a syncKey (new method) or old parameters (legacy)
+    const syncKey = event.syncKey;
 
-  // Redirect to transcribe function to start the conversation loop
-  // Only mark as first call for AGENT (so they speak greeting)
-  // Customer starts in listen mode (isFirstCall=false means they use <Gather>)
-  const transcribeUrl = buildFunctionUrl('transcribe', {
-    role: params.role,
-    persona: params.persona,
-    conferenceId: params.conferenceId,
-    isFirstCall: params.role === 'agent' ? 'true' : 'false',
-  });
+    let params;
 
-  twiml.redirect(
-    {
-      method: 'POST',
-    },
-    transcribeUrl
-  );
+    if (syncKey) {
+      // NEW METHOD: Fetch participant data from Sync
+      console.log(`📦 Fetching participant data from Sync: ${syncKey}`);
 
-  const response = new Twilio.Response();
-  response.appendHeader('Content-Type', 'text/xml');
-  response.setBody(twiml.toString());
+      const client = context.getTwilioClient();
+      const syncServiceSid = context.SYNC_SERVICE_SID || context.TWILIO_SYNC_SERVICE_SID;
 
-  callback(null, response);
+      if (!syncServiceSid) {
+        throw new Error('SYNC_SERVICE_SID or TWILIO_SYNC_SERVICE_SID must be set in environment');
+      }
+
+      const syncDoc = await client.sync.v1
+        .services(syncServiceSid)
+        .documents(syncKey)
+        .fetch();
+
+      const data = syncDoc.data;
+
+      params = {
+        role: data.role,
+        persona: data.name,
+        conferenceId: syncKey.split('_')[0], // Extract conferenceId from key
+        systemPrompt: data.systemPrompt,
+        introduction: data.introduction,
+      };
+
+      console.log(
+        `📞 Voice handler called for ${params.role}: ${params.persona} (from Sync)`
+      );
+    } else {
+      // LEGACY METHOD: Extract parameters from URL (backwards compatibility)
+      params = extractConversationParams(event);
+
+      console.log(
+        `📞 Voice handler called for ${params.role}: ${params.persona} (legacy)`
+      );
+    }
+
+    // Redirect to transcribe function to start the conversation loop
+    // Only mark as first call for AGENT (so they speak greeting)
+    // Customer starts in listen mode (isFirstCall=false means they use <Gather>)
+    const transcribeUrl = buildFunctionUrl('transcribe', {
+      role: params.role,
+      persona: params.persona,
+      conferenceId: params.conferenceId,
+      isFirstCall: params.role === 'agent' ? 'true' : 'false',
+      syncKey: syncKey, // Pass syncKey along for subsequent calls
+    });
+
+    twiml.redirect(
+      {
+        method: 'POST',
+      },
+      transcribeUrl
+    );
+
+    const response = new Twilio.Response();
+    response.appendHeader('Content-Type', 'text/xml');
+    response.setBody(twiml.toString());
+
+    callback(null, response);
+  } catch (error) {
+    console.error('❌ Error in voice-handler:', error.message);
+
+    const response = new Twilio.Response();
+    response.appendHeader('Content-Type', 'text/xml');
+    response.setStatusCode(500);
+
+    const twiml = new Twilio.twiml.VoiceResponse();
+    twiml.say('We encountered an error. Please try again later.');
+    twiml.hangup();
+
+    response.setBody(twiml.toString());
+    callback(null, response);
+  }
 };
