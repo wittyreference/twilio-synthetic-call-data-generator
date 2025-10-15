@@ -3,24 +3,47 @@
 
 const fs = require('fs');
 const path = require('path');
+const axios = require('axios');
 
 // Load customers and agents
-function loadCustomers() {
-  const customersPath = path.join(__dirname, '..', 'assets', 'customers.json');
+async function loadCustomers(context, runtime) {
+  // In Twilio serverless environment, fetch from deployed assets via HTTP
+  if (context && context.DOMAIN_NAME) {
+    try {
+      const response = await axios.get(`https://${context.DOMAIN_NAME}/customers.json`);
+      const data = response.data;
+      return data.CustomerPrompts || data;
+    } catch (err) {
+      console.error('Error loading customers from deployed assets:', err);
+    }
+  }
+  // Fallback for local development
+  const customersPath = path.join(process.cwd(), 'assets', 'customers.json');
   const data = JSON.parse(fs.readFileSync(customersPath, 'utf8'));
   return data.CustomerPrompts || data;
 }
 
-function loadAgents() {
-  const agentsPath = path.join(__dirname, '..', 'assets', 'agents.json');
+async function loadAgents(context, runtime) {
+  // In Twilio serverless environment, fetch from deployed assets via HTTP
+  if (context && context.DOMAIN_NAME) {
+    try {
+      const response = await axios.get(`https://${context.DOMAIN_NAME}/agents.json`);
+      const data = response.data;
+      return data.AgentPrompts || data;
+    } catch (err) {
+      console.error('Error loading agents from deployed assets:', err);
+    }
+  }
+  // Fallback for local development
+  const agentsPath = path.join(process.cwd(), 'assets', 'agents.json');
   const data = JSON.parse(fs.readFileSync(agentsPath, 'utf8'));
   return data.AgentPrompts || data;
 }
 
 // Select random pair
-function selectRandomPair() {
-  const customers = loadCustomers();
-  const agents = loadAgents();
+async function selectRandomPair(context, runtime) {
+  const customers = await loadCustomers(context, runtime);
+  const agents = await loadAgents(context, runtime);
 
   const customer = customers[Math.floor(Math.random() * customers.length)];
   const agent = agents[Math.floor(Math.random() * agents.length)];
@@ -108,8 +131,11 @@ exports.handler = async function (context, event, callback) {
   try {
     console.log('🎬 Starting conference creation...');
 
-    // Select random customer-agent pair
-    const { customer, agent, conferenceId } = selectRandomPair();
+    // Select random customer-agent pair - pass context and Runtime from global scope
+    const { customer, agent, conferenceId } = await selectRandomPair(
+      context,
+      typeof Runtime !== 'undefined' ? Runtime : null
+    );
 
     console.log(
       `Selected pair: ${customer.CustomerName} <-> ${agent.AgentName}`
