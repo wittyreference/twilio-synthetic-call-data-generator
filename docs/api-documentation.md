@@ -396,7 +396,7 @@ Adds an AI-powered agent to a conference using TwiML Application.
 ```
 
 **TwiML Application Features:**
-- OpenAI GPT-4o integration via serverless functions
+- OpenAI GPT-5-nano integration via serverless functions
 - Dynamic persona loading from JSON files
 - System prompt construction with agent characteristics
 - Conversation history management
@@ -770,7 +770,7 @@ Listens for speech input using Twilio's `<Gather>` verb and redirects to respond
 
 **File:** `functions/respond.js`
 
-Processes speech input via OpenAI GPT-4o and generates AI response.
+Processes speech input via OpenAI GPT-5-nano and generates AI response.
 
 **Endpoint:** `POST /respond`
 

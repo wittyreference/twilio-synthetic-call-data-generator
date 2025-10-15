@@ -74,7 +74,7 @@ async function createSyntheticConference(strategy = 'random') {
     console.log('🔊 Conversation Flow:');
     console.log('   1. Voice Handler → Entry point for TwiML Application');
     console.log('   2. Transcribe → Listens for speech with <Gather>');
-    console.log('   3. Respond → Processes with OpenAI GPT-4o');
+    console.log('   3. Respond → Processes with OpenAI GPT-5-nano');
     console.log('   4. Loop back to Transcribe → Continuous conversation\n');
 
     console.log('📞 Monitor in Twilio Console:');

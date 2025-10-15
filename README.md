@@ -26,7 +26,7 @@ Generates realistic synthetic call data for testing, development, and analytics:
 ## 🛠 Tech Stack
 
 - **Backend**: Node.js 18+, Twilio Serverless Functions
-- **AI**: OpenAI GPT-4o, Twilio Voice Intelligence
+- **AI**: OpenAI GPT-5-nano, Twilio Voice Intelligence
 - **Data**: Segment CDP, Twilio Sync
 - **Testing**: Jest (634 tests), Newman (Postman)
 - **CI/CD**: GitHub Actions
