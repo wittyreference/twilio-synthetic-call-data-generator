@@ -107,7 +107,8 @@ async function addParticipantToConference(
   client,
   conferenceId,
   participant,
-  role
+  role,
+  isFirstParticipant = false
 ) {
   const isAgent = role === 'agent';
   const name = isAgent ? participant.AgentName : participant.CustomerName;
@@ -137,25 +138,39 @@ async function addParticipantToConference(
     role
   );
 
+  // Build participant creation parameters
+  const participantParams = {
+    from: twilioPhoneNumber,
+    to: `app:${twimlAppSid}?syncKey=${encodeURIComponent(syncKey)}`,
+    earlyMedia: true,
+    endConferenceOnExit: false,
+    beep: false,
+    timeLimit: 300, // Auto-terminate participant after 5 minutes (300 seconds)
+    record: true, // Enable recording
+    recordingStatusCallback: `https://${context.DOMAIN_NAME}/transcription-webhook`,
+    recordingStatusCallbackEvent: ['completed'],
+    recordingStatusCallbackMethod: 'POST',
+    statusCallback: `https://${context.DOMAIN_NAME}/conference-status-webhook`,
+    statusCallbackEvent: ['initiated', 'ringing', 'answered', 'completed'],
+    statusCallbackMethod: 'POST',
+    label: role,
+  };
+
+  // If this is the first participant, add conference-level callbacks
+  if (isFirstParticipant) {
+    console.log(`📞 Setting conference-level callbacks for ${conferenceId}`);
+    participantParams.conferenceStatusCallback = `https://${context.DOMAIN_NAME}/conference-status-webhook`;
+    participantParams.conferenceStatusCallbackEvent = ['start', 'end', 'join', 'leave'];
+    participantParams.conferenceStatusCallbackMethod = 'POST';
+    participantParams.conferenceRecord = 'record-from-start';
+    participantParams.conferenceRecordingStatusCallback = `https://${context.DOMAIN_NAME}/transcription-webhook`;
+    participantParams.conferenceRecordingStatusCallbackEvent = ['in-progress', 'completed'];
+  }
+
   // Pass only the reference key in URL (much shorter!)
   const participantObj = await client
     .conferences(conferenceId)
-    .participants.create({
-      from: twilioPhoneNumber,
-      to: `app:${twimlAppSid}?syncKey=${encodeURIComponent(syncKey)}`,
-      earlyMedia: true,
-      endConferenceOnExit: false,
-      beep: false,
-      timeLimit: 300, // Auto-terminate participant after 5 minutes (300 seconds)
-      record: true, // Enable recording
-      recordingStatusCallback: `https://${context.DOMAIN_NAME}/transcription-webhook`,
-      recordingStatusCallbackEvent: ['completed'],
-      recordingStatusCallbackMethod: 'POST',
-      statusCallback: `https://${context.DOMAIN_NAME}/conference-status-webhook`,
-      statusCallbackEvent: ['initiated', 'ringing', 'answered', 'completed'],
-      statusCallbackMethod: 'POST',
-      label: role,
-    });
+    .participants.create(participantParams);
 
   return participantObj.callSid;
 }
@@ -205,25 +220,28 @@ exports.handler = async function (context, event, callback) {
     const twilioClient = context.getTwilioClient();
 
     // Create conference by adding participants
-    // Agent first (to deliver greeting)
+    // Agent first - this will create the conference and set callbacks
+    // Agent will wait in silence for conference-start event
     const agentCallSid = await addParticipantToConference(
       context,
       twilioClient,
       conferenceId,
       agent,
-      'agent'
+      'agent',
+      true // isFirstParticipant - sets conference-level callbacks
     );
 
-    // Small delay to ensure agent greeting starts
+    // Small delay to ensure agent joins first
     await new Promise(resolve => setTimeout(resolve, 2000));
 
-    // Then customer (to hear greeting)
+    // Then customer - when they join, conference-start fires
     const customerCallSid = await addParticipantToConference(
       context,
       twilioClient,
       conferenceId,
       customer,
-      'customer'
+      'customer',
+      false // not first participant
     );
 
     // Schedule 5-minute termination

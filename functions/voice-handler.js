@@ -59,23 +59,32 @@ exports.handler = async function (context, event, callback) {
       );
     }
 
-    // Redirect to transcribe function to start the conversation loop
-    // Only mark as first call for AGENT (so they speak greeting)
-    // Customer starts in listen mode (isFirstCall=false means they use <Gather>)
-    const transcribeUrl = buildFunctionUrl('transcribe', {
-      role: params.role,
-      persona: params.persona,
-      conferenceId: params.conferenceId,
-      isFirstCall: params.role === 'agent' ? 'true' : 'false',
-      syncKey: syncKey, // Pass syncKey along for subsequent calls
-    });
+    // Agent vs Customer routing:
+    // - AGENT: Holds in silence, waiting for conference-start event to trigger greeting
+    // - CUSTOMER: Starts listening immediately with <Gather>
+    if (params.role === 'agent') {
+      // Agent holds and waits for conference-start event
+      // Conference-start webhook will redirect agent to speak greeting
+      console.log('🎙️  Agent waiting for conference-start event...');
+      twiml.say('');  // Silent hold
+      twiml.pause({ length: 300 }); // Hold for 5 minutes (conference will auto-terminate)
+    } else {
+      // Customer starts in listen mode immediately
+      const transcribeUrl = buildFunctionUrl('transcribe', {
+        role: params.role,
+        persona: params.persona,
+        conferenceId: params.conferenceId,
+        isFirstCall: 'false', // Customer starts listening
+        syncKey: syncKey,
+      });
 
-    twiml.redirect(
-      {
-        method: 'POST',
-      },
-      transcribeUrl
-    );
+      twiml.redirect(
+        {
+          method: 'POST',
+        },
+        transcribeUrl
+      );
+    }
 
     const response = new Twilio.Response();
     response.appendHeader('Content-Type', 'text/xml');

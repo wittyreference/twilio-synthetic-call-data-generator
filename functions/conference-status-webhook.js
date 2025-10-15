@@ -78,8 +78,16 @@ exports.handler = async function (context, event, callback) {
     };
 
     switch (eventType) {
+      case 'conference-start':
+        response = await handleConferenceStart(context, event, timestamp);
+        break;
+
       case 'conference-end':
         response = handleConferenceEnd(event, timestamp);
+        break;
+
+      case 'participant-join':
+        response = await handleParticipantJoin(context, event, timestamp);
         break;
 
       case 'participant-leave':
@@ -294,6 +302,82 @@ async function handleRecordingCompleted(context, event, timestamp) {
     conferenceSid,
     duration,
     recordingStatus,
+    timestamp,
+  };
+}
+
+/**
+ * Handles conference-start events
+ * This fires when the conference actually begins (both participants connected)
+ * We use this to signal the agent to start their greeting
+ */
+async function handleConferenceStart(context, event, timestamp) {
+  const conferenceSid = event.ConferenceSid;
+  const friendlyName = event.FriendlyName;
+
+  console.log(`🎬 Conference started: ${conferenceSid}`);
+  if (friendlyName) {
+    console.log(`   Name: ${friendlyName}`);
+  }
+
+  // Find the agent participant and redirect them to start greeting
+  try {
+    const client = context.getTwilioClient();
+
+    // Get all participants
+    const participants = await client
+      .conferences(conferenceSid)
+      .participants.list();
+
+    // Find agent (labeled as 'agent')
+    const agent = participants.find(p => p.label === 'agent');
+
+    if (agent) {
+      console.log(`👤 Found agent participant: ${agent.callSid}`);
+      console.log(`🎙️  Redirecting agent to start greeting...`);
+
+      // Redirect agent's call to start greeting
+      await client.calls(agent.callSid).update({
+        twiml: `<Response><Redirect method="POST">https://${context.DOMAIN_NAME}/transcribe?role=agent&amp;conferenceId=${friendlyName}&amp;isFirstCall=true&amp;syncKey=${friendlyName}_agent</Redirect></Response>`,
+      });
+
+      console.log(`✅ Agent redirected to start greeting`);
+    } else {
+      console.warn(`⚠️  Agent participant not found in conference ${conferenceSid}`);
+    }
+  } catch (error) {
+    console.error(`❌ Error redirecting agent:`, error);
+  }
+
+  return {
+    success: true,
+    event: 'conference-start',
+    conferenceSid,
+    friendlyName,
+    timestamp,
+  };
+}
+
+/**
+ * Handles participant-join events
+ */
+async function handleParticipantJoin(context, event, timestamp) {
+  const conferenceSid = event.ConferenceSid;
+  const callSid = event.CallSid;
+  const participantLabel = event.ParticipantLabel;
+
+  console.log(`👋 Participant joined conference: ${conferenceSid}`);
+  console.log(`   Call SID: ${callSid}`);
+  if (participantLabel) {
+    console.log(`   Label: ${participantLabel}`);
+  }
+
+  return {
+    success: true,
+    event: 'participant-join',
+    conferenceSid,
+    callSid,
+    participantLabel,
     timestamp,
   };
 }
