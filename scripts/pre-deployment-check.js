@@ -157,8 +157,8 @@ async function checkDataFiles() {
 
   try {
     const dataFiles = [
-      { path: 'customers.json', required: true },
-      { path: 'agents.json', required: true },
+      { path: 'assets/customers.json', required: true },
+      { path: 'assets/agents.json', required: true },
     ];
 
     let allValid = true;

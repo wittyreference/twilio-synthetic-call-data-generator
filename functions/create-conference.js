@@ -6,13 +6,13 @@ const path = require('path');
 
 // Load customers and agents
 function loadCustomers() {
-  const customersPath = path.join(__dirname, '..', 'customers.json');
+  const customersPath = path.join(__dirname, '..', 'assets', 'customers.json');
   const data = JSON.parse(fs.readFileSync(customersPath, 'utf8'));
   return data.CustomerPrompts || data;
 }
 
 function loadAgents() {
-  const agentsPath = path.join(__dirname, '..', 'agents.json');
+  const agentsPath = path.join(__dirname, '..', 'assets', 'agents.json');
   const data = JSON.parse(fs.readFileSync(agentsPath, 'utf8'));
   return data.AgentPrompts || data;
 }

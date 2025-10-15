@@ -90,5 +90,6 @@ templates/
 .twiliodeployinfo
 .github/prompts/
 
-# Agent configuration
-agents.json
+# Root-level persona files (use assets/ instead)
+/agents.json
+/customers.json

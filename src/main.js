@@ -94,7 +94,7 @@ async function createSyntheticConference(strategy = 'random') {
     console.error('   2. Verify TWIML_APP_SID points to voice-handler.js');
     console.error('   3. Ensure phone numbers are in E.164 format (+1234567890)');
     console.error('   4. Check Twilio account has sufficient balance');
-    console.error('   5. Verify agents.json and customers.json exist\n');
+    console.error('   5. Verify assets/agents.json and assets/customers.json exist\n');
     console.error('Full error:', error.stack);
     process.exit(1);
   }

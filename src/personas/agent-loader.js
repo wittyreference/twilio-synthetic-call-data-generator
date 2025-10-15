@@ -5,7 +5,7 @@ const fs = require('fs');
 const path = require('path');
 
 // Default path to agents.json
-const DEFAULT_AGENTS_PATH = path.join(process.cwd(), 'agents.json');
+const DEFAULT_AGENTS_PATH = path.join(process.cwd(), 'assets', 'agents.json');
 
 // Valid values for competence level
 const VALID_COMPETENCE_LEVELS = ['Low', 'Medium', 'High'];

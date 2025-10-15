@@ -230,7 +230,7 @@ async function handleErrorRemediation(context, errorData, severity) {
     case 21211: // Invalid phone number
       actions.push('LOG: Invalid phone number detected');
       actions.push(`Phone number: ${errorData.payload.to || 'unknown'}`);
-      // Could update customers.json or flag for review
+      // Could update assets/customers.json or flag for review
       break;
 
     case 53205: // Conference error

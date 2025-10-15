@@ -82,7 +82,7 @@ async function purchasePhoneNumber(phoneNumber, friendlyName) {
 }
 
 async function updateCustomersJson(phoneNumberMappings) {
-  const customersPath = path.join(__dirname, '..', 'customers.json');
+  const customersPath = path.join(__dirname, '..', 'assets', 'customers.json');
   const customersData = JSON.parse(fs.readFileSync(customersPath, 'utf8'));
 
   const customers = customersData.CustomerPrompts || customersData;
@@ -101,7 +101,7 @@ async function updateCustomersJson(phoneNumberMappings) {
     : customers;
 
   fs.writeFileSync(customersPath, JSON.stringify(updatedData, null, 2));
-  console.log('\n✅ Updated customers.json with phone numbers');
+  console.log('\n✅ Updated assets/customers.json with phone numbers');
 }
 
 async function updateEnvFile(agentPhoneNumber) {

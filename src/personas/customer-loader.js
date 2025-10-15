@@ -5,7 +5,7 @@ const fs = require('fs');
 const path = require('path');
 
 // Default path to customers.json
-const DEFAULT_CUSTOMERS_PATH = path.join(process.cwd(), 'customers.json');
+const DEFAULT_CUSTOMERS_PATH = path.join(process.cwd(), 'assets', 'customers.json');
 
 // Valid values for technical proficiency
 const VALID_TECH_PROFICIENCY = ['Low', 'Medium', 'High'];
