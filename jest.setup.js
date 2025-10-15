@@ -132,6 +132,38 @@ global.mockCallback = () => jest.fn((err, result) => {
   return result;
 });
 
+// Mock Runtime global for Twilio serverless functions
+global.Runtime = {
+  getFunctions: jest.fn(() => ({
+    'utils/persona-loader': {
+      path: require.resolve('./functions/utils/persona-loader.js'),
+    },
+    'utils/url-builder': {
+      path: require.resolve('./functions/utils/url-builder.js'),
+    },
+    'utils/webhook-validator': {
+      path: require.resolve('./functions/utils/webhook-validator.js'),
+    },
+    'utils/conversation-validator': {
+      path: require.resolve('./functions/utils/conversation-validator.js'),
+    },
+    'utils/sync-manager': {
+      path: require.resolve('./functions/utils/sync-manager.js'),
+    },
+    'utils/error-utils': {
+      path: require.resolve('./functions/utils/error-utils.js'),
+    },
+  })),
+  getAssets: jest.fn(() => ({
+    'agents.json': {
+      path: require.resolve('./assets/agents.json'),
+    },
+    'customers.json': {
+      path: require.resolve('./assets/customers.json'),
+    },
+  })),
+};
+
 // Suppress console output during tests for pristine test output
 const originalConsole = {
   log: console.log,

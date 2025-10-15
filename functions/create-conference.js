@@ -146,6 +146,7 @@ async function addParticipantToConference(
       earlyMedia: true,
       endConferenceOnExit: false,
       beep: false,
+      timeLimit: 300, // Auto-terminate participant after 5 minutes (300 seconds)
       record: true, // Enable recording
       recordingStatusCallback: `https://${context.DOMAIN_NAME}/transcription-webhook`,
       recordingStatusCallbackEvent: ['completed'],
@@ -160,26 +161,25 @@ async function addParticipantToConference(
 }
 
 // Note: Conference auto-termination
-// Conferences will run until natural completion (customer or agent hangs up)
-// For manual termination after 5 minutes, call the conference-timer endpoint:
+// Participants are automatically terminated after 5 minutes via timeLimit parameter
+// This prevents runaway conversations and controls costs
+// For manual early termination, call the conference-timer endpoint:
 // POST https://DOMAIN/conference-timer with {"ConferenceSid": "CFXXXX"}
-//
-// To implement auto-termination, use an external scheduler service (AWS EventBridge,
-// Zapier, etc.) to call the timer endpoint 5 minutes after conference creation
 async function scheduleConferenceTermination(context, conferenceId, client) {
   const timerUrl = `https://${context.DOMAIN_NAME}/conference-timer`;
   const delayMs = 5 * 60 * 1000; // 5 minutes
 
-  console.log(`Conference ${conferenceId} will run until natural completion`);
-  console.log(`To manually terminate, call: ${timerUrl}?ConferenceSid=${conferenceId}`);
+  console.log(`Conference ${conferenceId} will auto-terminate after 5 minutes (timeLimit)`);
+  console.log(`For early manual termination, call: ${timerUrl}?ConferenceSid=${conferenceId}`);
 
   // Return metadata for reference
   return {
-    scheduled: false,
-    note: 'Auto-termination requires external scheduler service',
+    scheduled: true,
+    method: 'timeLimit parameter on participant',
+    note: 'Participants auto-terminate after 5 minutes via Twilio timeLimit',
     timerUrl: timerUrl,
     conferenceId: conferenceId,
-    suggestedTerminateAt: new Date(Date.now() + delayMs).toISOString(),
+    terminatesAt: new Date(Date.now() + delayMs).toISOString(),
   };
 }
 
