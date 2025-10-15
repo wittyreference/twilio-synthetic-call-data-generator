@@ -34,7 +34,7 @@ Generates realistic synthetic call data for testing, development, and analytics:
 
 ## 💰 Cost Estimation
 
-**Per 100 synthetic calls** (assuming 2-minute average conversation):
+**Per 100 synthetic calls** (assuming 2-minute average conversation, 5-minute maximum):
 
 | Service | Usage | Cost |
 |---------|-------|------|
@@ -50,8 +50,13 @@ Generates realistic synthetic call data for testing, development, and analytics:
 - `MAX_DAILY_CALLS=100` = ~$6.75/day for testing
 - Adjust `MAX_DAILY_CALLS` in `.env` to control spending
 
+**Cost Controls Built-in**:
+- ✅ **Auto-termination at 5 minutes** - Prevents runaway conversation costs
+- ✅ **Rate limiting** - `MAX_DAILY_CALLS` prevents accidental overspending
+- ✅ **Efficient model** - GPT-5-nano is 20x cheaper than GPT-4
+
 **Cost-Saving Tips**:
-- Use shorter conversations for testing (set max turns in persona data)
+- Use shorter conversations for testing (conferences auto-terminate at 5 minutes)
 - Start with `MAX_DAILY_CALLS=10` during development
 - Monitor OpenAI usage at [platform.openai.com/usage](https://platform.openai.com/usage)
 - Use Twilio's free trial credits for initial testing
@@ -289,20 +294,46 @@ npm run twilio:deploy:dev  # Deploy to development environment
 We practice strict TDD with comprehensive coverage:
 
 1. **Write failing test** (Red)
-2. **Write minimal code** to pass (Green)  
+2. **Write minimal code** to pass (Green)
 3. **Refactor** while keeping tests green
 
 ### Test Types & Coverage
 
-- **Unit Tests**: Individual function testing (Jest/pytest)
-- **Integration Tests**: Component interactions
+- **Unit Tests**: Individual function testing (Jest)
+- **Integration Tests**: Component interactions and regression prevention
+- **E2E Tests**: Full pipeline validation with real Twilio APIs
 - **API Tests**: End-to-end validation (Newman)
 - **Coverage Target**: >80% for all test types
+
+### Regression Prevention Tests
+
+**Critical regression tests** protect against production issues:
+
+#### OpenAI API Compatibility (`tests/integration/openai-api-parameters.test.js`)
+Fast static code analysis (~200ms) that validates:
+- ✅ Using `max_completion_tokens` (not deprecated `max_tokens`)
+- ✅ No unsupported `temperature` parameter for gpt-5-nano
+- ✅ Prevents 400 BadRequest errors from OpenAI
+
+```bash
+npm test tests/integration/openai-api-parameters.test.js
+```
+
+#### Transcript Content Validation (`tests/e2e/transcript-content-validation.test.js`)
+Full E2E test (~6-7 minutes) that validates:
+- ✅ Transcripts contain real AI conversations (not error messages)
+- ✅ Multi-speaker dialogue (agent + customer)
+- ✅ Contextual customer responses (not generic errors)
+- ✅ Agent introductions are captured correctly
+
+```bash
+npm test tests/e2e/transcript-content-validation.test.js
+```
 
 ### Running Tests
 
 ```bash
-# All tests (634 tests)
+# All tests
 npm test
 
 # Watch mode for development
@@ -310,6 +341,9 @@ npm run test:watch
 
 # Coverage report
 npm run test:coverage
+
+# Fast regression tests only (recommended for CI)
+npm test tests/integration/
 
 # API tests (Newman/Postman)
 npm run test:api
