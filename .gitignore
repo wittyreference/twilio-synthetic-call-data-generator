@@ -53,8 +53,7 @@ htmlcov/
 venv/
 
 # IDE and Editor Settings
-.vscode/settings.json
-.vscode/launch.json
+.vscode/
 .claude/
 .cursor/
 
@@ -89,6 +88,7 @@ todo.md
 CLAUDE.md
 templates/
 .twiliodeployinfo
+.github/prompts/
 
 # Agent configuration
 agents.json
