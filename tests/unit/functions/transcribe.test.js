@@ -82,6 +82,11 @@ describe('Transcribe Function', () => {
             return this;
           });
 
+          // Pause method on the main VoiceResponse (for agent introduction)
+          this.pause = jest.fn(function (options) {
+            return this;
+          });
+
           this.gather = jest.fn(function (options) {
             this.gatherCalled = true;
             this.gatherOptions = options;
@@ -241,7 +246,7 @@ describe('Transcribe Function', () => {
       );
     });
 
-    it('should enable enhanced speech recognition', async () => {
+    it('should NOT set enhanced parameter (experimental_conversations model does not support it)', async () => {
       mockEvent = {
         role: 'agent',
         persona: 'Sophie',
@@ -251,7 +256,8 @@ describe('Transcribe Function', () => {
       await transcribe.handler(mockContext, mockEvent, mockCallback);
 
       const twiml = Twilio.twiml.getLastInstance();
-      expect(twiml.gatherOptions.enhanced).toBe(true);
+      // experimental_conversations model doesn't support enhanced parameter
+      expect(twiml.gatherOptions.enhanced).toBeUndefined();
     });
 
     it('should disable profanity filter', async () => {
@@ -396,7 +402,7 @@ describe('Transcribe Function', () => {
         role: 'agent',
         persona: 'Sophie',
         conferenceId: 'test-conf-123',
-        isFirstCall: 'true', // isFirstCall flag triggers introduction
+        shouldDeliverIntroduction: 'true', // shouldDeliverIntroduction flag triggers introduction
       };
 
       await transcribe.handler(mockContext, mockEvent, mockCallback);
@@ -421,7 +427,7 @@ describe('Transcribe Function', () => {
         role: 'agent',
         persona: 'Sarah',
         conferenceId: 'test-conf-123',
-        isFirstCall: 'true',
+        shouldDeliverIntroduction: 'true',
       };
 
       await transcribe.handler(mockContext, mockEvent, mockCallback);
@@ -438,7 +444,7 @@ describe('Transcribe Function', () => {
         role: 'agent',
         persona: 'Unknown Agent',
         conferenceId: 'test-conf-123',
-        isFirstCall: 'true',
+        shouldDeliverIntroduction: 'true',
       };
 
       await transcribe.handler(mockContext, mockEvent, mockCallback);
@@ -453,7 +459,7 @@ describe('Transcribe Function', () => {
         role: 'customer',
         persona: 'John Doe',
         conferenceId: 'test-conf-123',
-        isFirstCall: 'true',
+        shouldDeliverIntroduction: 'true',
       };
 
       await transcribe.handler(mockContext, mockEvent, mockCallback);
@@ -475,7 +481,7 @@ describe('Transcribe Function', () => {
         role: 'agent',
         persona: 'Sophie',
         conferenceId: 'test-conf-123',
-        isFirstCall: 'false', // Not first call = no introduction
+        shouldDeliverIntroduction: 'false', // Already delivered introduction
       };
 
       await transcribe.handler(mockContext, mockEvent, mockCallback);
@@ -497,7 +503,7 @@ describe('Transcribe Function', () => {
         role: 'agent',
         persona: 'Sophie',
         conferenceId: 'test-conf-123',
-        isFirstCall: 'true',
+        shouldDeliverIntroduction: 'true',
       };
 
       await transcribe.handler(mockContext, mockEvent, mockCallback);

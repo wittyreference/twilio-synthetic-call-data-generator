@@ -55,7 +55,8 @@ describe('Local Code Execution Integration Tests', () => {
 
       // Validate timer metadata
       expect(response).toHaveProperty('timer');
-      expect(response.timer.scheduled).toBe(false);
+      expect(response.timer.scheduled).toBe(true);
+      expect(response.timer.method).toBe('timeLimit parameter on participant');
     }, timeout);
 
     it('should load customer personas from assets directory', async () => {

@@ -59,7 +59,7 @@ SYNC_SERVICE_SID=ISxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
 
 ## Step 3: Configure Rate Limiting (Optional)
 
-By default, the system allows **1000 OpenAI calls per day** (~$0.65/day at gpt-5-nano pricing).
+By default, the system allows **1000 OpenAI calls per day** (~$3/day at gpt-4o-mini pricing).
 
 **⚠️ IMPORTANT:** Configure this based on your budget and expected usage!
 
@@ -69,13 +69,13 @@ Edit `.env`:
 
 ```env
 # Conservative (low cost)
-MAX_DAILY_CALLS=100    # ~$0.065/day
+MAX_DAILY_CALLS=100    # ~$0.30/day
 
 # Default (moderate usage)
-MAX_DAILY_CALLS=1000   # ~$0.65/day
+MAX_DAILY_CALLS=1000   # ~$3/day
 
 # High volume (enterprise)
-MAX_DAILY_CALLS=10000  # ~$6.50/day
+MAX_DAILY_CALLS=10000  # ~$30/day
 ```
 
 ### Rate Limit Behavior
@@ -230,7 +230,7 @@ twilio api:sync:v1:services:documents:remove \
 - Cost: (360,000 - 50,000) / 1,000 × $0.05 = **$15.50/month**
 
 **vs. OpenAI Costs:**
-- 1,000 calls/day × 30 days × $0.03/call = **$900/month**
+- 1,000 calls/day × 30 days × $0.003/call = **$90/month**
 
 Sync is ~1.7% of total AI costs.
 

@@ -1,6 +1,11 @@
 // ABOUTME: Serverless function to create synthetic conferences with customer-agent pairs
 // ABOUTME: Uses conference orchestration logic to create real Twilio calls with AI participants
 
+// ⚠️ LOCKED FILE - DO NOT MODIFY WITHOUT MC'S EXPLICIT AUTHORIZATION ⚠️
+// This file controls core call flow which is WORKING with multi-turn conversations.
+// See docs/CALL-INFRASTRUCTURE-LOCKDOWN.md for details.
+// Any modifications require MC to say: "I AUTHORIZE YOU TO MODIFY create-conference.js"
+
 const fs = require('fs');
 const path = require('path');
 const axios = require('axios');
@@ -115,11 +120,10 @@ async function addParticipantToConference(
 
   console.log(`Adding ${role}: ${name} to conference ${conferenceId}`);
 
-  const twilioPhoneNumber =
-    context.AGENT_PHONE_NUMBER || context.TWILIO_PHONE_NUMBER;
+  const agentPhoneNumber = context.AGENT_PHONE_NUMBER || context.TWILIO_PHONE_NUMBER;
   const twimlAppSid = context.TWIML_APP_SID;
 
-  if (!twilioPhoneNumber) {
+  if (!agentPhoneNumber) {
     throw new Error(
       'AGENT_PHONE_NUMBER or TWILIO_PHONE_NUMBER must be set in environment'
     );
@@ -127,6 +131,15 @@ async function addParticipantToConference(
 
   if (!twimlAppSid) {
     throw new Error('TWIML_APP_SID must be set in environment');
+  }
+
+  // Determine the 'from' phone number based on role
+  // Customer: use their phone number for Segment tracking
+  // Agent: use agent/contact center phone number
+  const fromPhoneNumber = isAgent ? agentPhoneNumber : participant.PhoneNumber;
+
+  if (!fromPhoneNumber) {
+    throw new Error(`Missing phone number for ${role}: ${name}`);
   }
 
   // Store participant data in Sync to avoid 800-char URL limit
@@ -139,9 +152,25 @@ async function addParticipantToConference(
   );
 
   // Build participant creation parameters
+  //
+  // ⚠️  CRITICAL: Custom parameters MUST be passed as query string on 'to' field
+  // DO NOT modify this pattern - custom params do NOT work as top-level properties
+  // See: https://www.twilio.com/docs/voice/api/conference-participant-resource#custom-parameters
+  //
+  // CORRECT:   to: 'app:APxxx?sync_key=foo&role=bar'
+  // INCORRECT: { to: 'app:APxxx', sync_key: 'foo', role: 'bar' }
+  //
+  // IMPORTANT: Use snake_case (not camelCase) to match Twilio's convention
+  // These parameters are received in voice-handler as event.sync_key, event.conference_id, event.role
+  const customParams = new URLSearchParams({
+    sync_key: syncKey,       // Use snake_case for consistency with Twilio
+    conference_id: conferenceId,
+    role: role,
+  });
+
   const participantParams = {
-    from: twilioPhoneNumber,
-    to: `app:${twimlAppSid}?syncKey=${encodeURIComponent(syncKey)}`,
+    from: fromPhoneNumber,
+    to: `app:${twimlAppSid}?${customParams.toString()}`, // TwiML App with custom params in query string
     earlyMedia: true,
     endConferenceOnExit: false,
     beep: false,
@@ -156,6 +185,20 @@ async function addParticipantToConference(
     label: role,
   };
 
+  console.log(`📤 DEBUG: Creating participant with to=${participantParams.to}`);
+
+  // Conference orchestration: Customer starts conference, Agent joins running conference
+  // - Customer (first participant): startConferenceOnEnter=true (starts conference immediately)
+  // - Agent (second participant): startConferenceOnEnter=true (joins running conference)
+  // Customer waits in <Gather>, then Agent joins and immediately delivers greeting
+  if (isAgent) {
+    participantParams.startConferenceOnEnter = true; // Agent joins running conference
+    console.log(`🎙️  Agent will join running conference and deliver greeting`);
+  } else {
+    participantParams.startConferenceOnEnter = true; // Customer starts conference
+    console.log(`👤 Customer will start conference when they join`);
+  }
+
   // If this is the first participant, add conference-level callbacks
   if (isFirstParticipant) {
     console.log(`📞 Setting conference-level callbacks for ${conferenceId}`);
@@ -167,10 +210,15 @@ async function addParticipantToConference(
     participantParams.conferenceRecordingStatusCallbackEvent = ['in-progress', 'completed'];
   }
 
-  // Pass only the reference key in URL (much shorter!)
+  // Create participant via Participants API
   const participantObj = await client
     .conferences(conferenceId)
     .participants.create(participantParams);
+
+  console.log(`📥 DEBUG: Participant created, response:`);
+  console.log(`  CallSid: ${participantObj.callSid}`);
+  console.log(`  Label: ${participantObj.label}`);
+  console.log(`  ConferenceSid: ${participantObj.conferenceSid}`);
 
   return participantObj.callSid;
 }
@@ -220,27 +268,27 @@ exports.handler = async function (context, event, callback) {
     const twilioClient = context.getTwilioClient();
 
     // Create conference by adding participants
-    // Agent first - this will create the conference and set callbacks
-    // Agent will wait in silence for conference-start event
-    const agentCallSid = await addParticipantToConference(
-      context,
-      twilioClient,
-      conferenceId,
-      agent,
-      'agent',
-      true // isFirstParticipant - sets conference-level callbacks
-    );
-
-    // Small delay to ensure agent joins first
-    await new Promise(resolve => setTimeout(resolve, 2000));
-
-    // Then customer - when they join, conference-start fires
+    // Customer first - starts the conference when they join (startConferenceOnEnter=true)
+    // Customer will wait in <Gather> mode for agent to join
     const customerCallSid = await addParticipantToConference(
       context,
       twilioClient,
       conferenceId,
       customer,
       'customer',
+      true // isFirstParticipant - sets conference-level callbacks
+    );
+
+    // Small delay to ensure customer joins first and conference is ready
+    await new Promise(resolve => setTimeout(resolve, 2000));
+
+    // Then agent - joins running conference, immediately delivers greeting
+    const agentCallSid = await addParticipantToConference(
+      context,
+      twilioClient,
+      conferenceId,
+      agent,
+      'agent',
       false // not first participant
     );
 

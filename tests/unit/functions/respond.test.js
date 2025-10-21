@@ -426,7 +426,7 @@ describe('Respond Function', () => {
       expect(mockCreate).toHaveBeenCalled();
     });
 
-    it('should use gpt-5-nano model', async () => {
+    it('should use gpt-4o-mini model', async () => {
       mockCreate.mockResolvedValue({
         choices: [{ message: { content: 'Test response' } }],
       });
@@ -442,12 +442,12 @@ describe('Respond Function', () => {
 
       expect(mockCreate).toHaveBeenCalledWith(
         expect.objectContaining({
-          model: 'gpt-5-nano',
+          model: 'gpt-4o-mini',
         })
       );
     });
 
-    it('should set temperature to 0.7', async () => {
+    it('should set max_completion_tokens to 150', async () => {
       mockCreate.mockResolvedValue({
         choices: [{ message: { content: 'Test response' } }],
       });
@@ -463,12 +463,12 @@ describe('Respond Function', () => {
 
       expect(mockCreate).toHaveBeenCalledWith(
         expect.objectContaining({
-          temperature: 0.7,
+          max_completion_tokens: 150,
         })
       );
     });
 
-    it('should set max_tokens to 150', async () => {
+    it('should NOT set temperature parameter (uses model default)', async () => {
       mockCreate.mockResolvedValue({
         choices: [{ message: { content: 'Test response' } }],
       });
@@ -482,11 +482,8 @@ describe('Respond Function', () => {
 
       await respond.handler(mockContext, mockEvent, mockCallback);
 
-      expect(mockCreate).toHaveBeenCalledWith(
-        expect.objectContaining({
-          max_tokens: 150,
-        })
-      );
+      const callArgs = mockCreate.mock.calls[0][0];
+      expect(callArgs).not.toHaveProperty('temperature');
     });
 
     it('should extract response from OpenAI completion', async () => {
@@ -820,6 +817,80 @@ describe('Respond Function', () => {
         introduction: 'Hello',
         rawData: {},
       });
+    });
+
+    it('should handle empty OpenAI response with fallback message', async () => {
+      // Mock OpenAI returning empty content
+      mockCreate.mockResolvedValue({
+        choices: [{ message: { content: '' } }],
+      });
+
+      const consoleErrorSpy = jest
+        .spyOn(console, 'error')
+        .mockImplementation();
+
+      mockEvent = {
+        role: 'agent',
+        persona: 'Sophie',
+        conferenceId: 'test-conf-123',
+        SpeechResult: 'Hello',
+      };
+
+      await respond.handler(mockContext, mockEvent, mockCallback);
+
+      // Should log error about empty response
+      expect(consoleErrorSpy).toHaveBeenCalledWith(
+        expect.stringContaining('❌ OpenAI returned empty response')
+      );
+
+      // Should use fallback message
+      const twiml = Twilio.twiml.getLastInstance();
+      expect(twiml.sayCalled).toBe(true);
+      expect(twiml.sayMessage).toBe("I apologize, I didn't catch that. Could you please repeat?");
+
+      consoleErrorSpy.mockRestore();
+    });
+
+    it('should handle null OpenAI response with fallback message', async () => {
+      // Mock OpenAI returning null content
+      mockCreate.mockResolvedValue({
+        choices: [{ message: { content: null } }],
+      });
+
+      mockEvent = {
+        role: 'agent',
+        persona: 'Sophie',
+        conferenceId: 'test-conf-123',
+        SpeechResult: 'Hello',
+      };
+
+      await respond.handler(mockContext, mockEvent, mockCallback);
+
+      // Should use fallback message
+      const twiml = Twilio.twiml.getLastInstance();
+      expect(twiml.sayCalled).toBe(true);
+      expect(twiml.sayMessage).toBe("I apologize, I didn't catch that. Could you please repeat?");
+    });
+
+    it('should handle whitespace-only OpenAI response with fallback message', async () => {
+      // Mock OpenAI returning only whitespace
+      mockCreate.mockResolvedValue({
+        choices: [{ message: { content: '   \n\t  ' } }],
+      });
+
+      mockEvent = {
+        role: 'agent',
+        persona: 'Sophie',
+        conferenceId: 'test-conf-123',
+        SpeechResult: 'Hello',
+      };
+
+      await respond.handler(mockContext, mockEvent, mockCallback);
+
+      // Should use fallback message
+      const twiml = Twilio.twiml.getLastInstance();
+      expect(twiml.sayCalled).toBe(true);
+      expect(twiml.sayMessage).toBe("I apologize, I didn't catch that. Could you please repeat?");
     });
 
     it('should handle persona not found error', async () => {

@@ -2,7 +2,7 @@
 
 ## Overview
 
-The Twilio Synthetic Call Data Generator is built on a serverless architecture using Twilio Functions, OpenAI gpt-5-nano, and Segment CDP to create realistic customer-agent conversations with intelligent pairing and comprehensive analytics.
+The Twilio Synthetic Call Data Generator is built on a serverless architecture using Twilio Functions, OpenAI gpt-4o-mini, and Segment CDP to create realistic customer-agent conversations with intelligent pairing and comprehensive analytics.
 
 ## High-Level Architecture
 
@@ -80,7 +80,7 @@ sequenceDiagram
     participant VH as voice-handler
     participant Trans as transcribe
     participant Resp as respond
-    participant AI as OpenAI gpt-5-nano
+    participant AI as OpenAI gpt-4o-mini
     participant Sync as Twilio Sync
     participant VI as Voice Intelligence
 
@@ -184,7 +184,7 @@ if (isFirstCall === 'true' && role === 'agent') {
 1. Receive `SpeechResult` from `/transcribe`
 2. Load persona data (agent or customer characteristics)
 3. Retrieve conversation history from Twilio Sync
-4. Call OpenAI gpt-5-nano with conversation context
+4. Call OpenAI gpt-4o-mini with conversation context
 5. Store updated conversation in Sync
 6. Return TwiML with `<Say>` response
 7. Redirect back to `/transcribe` for next turn

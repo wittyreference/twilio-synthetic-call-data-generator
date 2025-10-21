@@ -16,14 +16,14 @@ describe('OpenAI API Parameters - Regression Prevention', () => {
     expect(respondCode).toMatch(/max_completion_tokens\s*:/);
   });
 
-  test('respond.js should NOT set custom temperature for gpt-5-nano', () => {
+  test('respond.js should NOT set custom temperature (uses model default)', () => {
     const fs = require('fs');
     const path = require('path');
 
     const respondPath = path.join(__dirname, '../../functions/respond.js');
     const respondCode = fs.readFileSync(respondPath, 'utf-8');
 
-    // gpt-5-nano only supports default temperature
+    // We use model default temperature
     // The code should not contain 'temperature:' in the OpenAI call
     const openaiCallMatch = respondCode.match(/chat\.completions\.create\s*\(\s*\{[\s\S]*?\}\s*\)/);
 
@@ -36,15 +36,15 @@ describe('OpenAI API Parameters - Regression Prevention', () => {
     }
   });
 
-  test('respond.js should use gpt-5-nano model', () => {
+  test('respond.js should use gpt-4o-mini model', () => {
     const fs = require('fs');
     const path = require('path');
 
     const respondPath = path.join(__dirname, '../../functions/respond.js');
     const respondCode = fs.readFileSync(respondPath, 'utf-8');
 
-    // Should use gpt-5-nano model
-    expect(respondCode).toMatch(/model\s*:\s*['"]gpt-5-nano['"]/);
+    // Should use gpt-4o-mini model (valid OpenAI model)
+    expect(respondCode).toMatch(/model\s*:\s*['"]gpt-4o-mini['"]/);
   });
 
   test('respond.js should set max_completion_tokens to 150', () => {
@@ -56,5 +56,22 @@ describe('OpenAI API Parameters - Regression Prevention', () => {
 
     // Should set max_completion_tokens to 150
     expect(respondCode).toMatch(/max_completion_tokens\s*:\s*150/);
+  });
+
+  test('respond.js should validate empty OpenAI responses with fallback', () => {
+    const fs = require('fs');
+    const path = require('path');
+
+    const respondPath = path.join(__dirname, '../../functions/respond.js');
+    const respondCode = fs.readFileSync(respondPath, 'utf-8');
+
+    // Should validate that aiResponse is not empty/null
+    expect(respondCode).toMatch(/if\s*\(\s*!aiResponse\s*\|\|\s*aiResponse\.trim\(\)\s*===\s*['"]['"]?\s*\)/);
+
+    // Should have a fallback message for empty responses
+    expect(respondCode).toMatch(/I apologize, I didn't catch that/);
+
+    // Should log error when empty response detected
+    expect(respondCode).toMatch(/OpenAI returned empty response/);
   });
 });

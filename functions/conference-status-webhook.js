@@ -54,17 +54,32 @@ exports.handler = async function (context, event, callback) {
   }
 
   try {
-    // Validate event has StatusCallbackEvent
-    if (!event || !event.StatusCallbackEvent) {
-      console.error('❌ Missing StatusCallbackEvent in webhook payload');
-      return callback(null, {
-        success: false,
-        error: 'StatusCallbackEvent is required',
-        timestamp: new Date().toISOString(),
-      });
+    // Detect event type from various possible fields
+    // Conference callbacks use StatusCallbackEvent
+    // Call status callbacks use CallStatus
+    // Recording callbacks use RecordingStatus
+    let eventType = event.StatusCallbackEvent;
+
+    if (!eventType) {
+      // Try to infer event type from other fields
+      if (event.RecordingStatus) {
+        eventType = `recording-${event.RecordingStatus}`;
+      } else if (event.CallStatus) {
+        eventType = `call-${event.CallStatus}`;
+      } else if (event.ConferenceSid && event.CallSid) {
+        // Participant-level callback without explicit event type
+        eventType = 'participant-status';
+      } else {
+        console.error('❌ Cannot determine event type from webhook payload');
+        console.error('Available fields:', Object.keys(event));
+        return callback(null, {
+          success: false,
+          error: 'Missing required field: StatusCallbackEvent',
+          timestamp: new Date().toISOString(),
+        });
+      }
     }
 
-    const eventType = event.StatusCallbackEvent;
     const timestamp = new Date().toISOString();
 
     console.log(`📞 Received webhook event: ${eventType}`);
@@ -118,10 +133,10 @@ exports.handler = async function (context, event, callback) {
     // Enhanced structured error logging with context
     const errorContext = createErrorContext({
       functionName: 'conference-status-webhook',
-      operation: event.StatusCallbackEvent,
-      conferenceSid: event.ConferenceSid,
-      callSid: event.CallSid,
-      recordingSid: event.RecordingSid,
+      operation: event?.StatusCallbackEvent,
+      conferenceSid: event?.ConferenceSid,
+      callSid: event?.CallSid,
+      recordingSid: event?.RecordingSid,
     });
 
     logStructuredError(error, errorContext);
@@ -308,8 +323,8 @@ async function handleRecordingCompleted(context, event, timestamp) {
 
 /**
  * Handles conference-start events
- * This fires when the conference actually begins (both participants connected)
- * We use this to signal the agent to start their greeting
+ * With startConferenceOnEnter orchestration, this is just for logging
+ * Agent automatically enters conference and speaks when customer joins
  */
 async function handleConferenceStart(context, event, timestamp) {
   const conferenceSid = event.ConferenceSid;
@@ -320,34 +335,9 @@ async function handleConferenceStart(context, event, timestamp) {
     console.log(`   Name: ${friendlyName}`);
   }
 
-  // Find the agent participant and redirect them to start greeting
-  try {
-    const client = context.getTwilioClient();
-
-    // Get all participants
-    const participants = await client
-      .conferences(conferenceSid)
-      .participants.list();
-
-    // Find agent (labeled as 'agent')
-    const agent = participants.find(p => p.label === 'agent');
-
-    if (agent) {
-      console.log(`👤 Found agent participant: ${agent.callSid}`);
-      console.log(`🎙️  Redirecting agent to start greeting...`);
-
-      // Redirect agent's call to start greeting
-      await client.calls(agent.callSid).update({
-        twiml: `<Response><Redirect method="POST">https://${context.DOMAIN_NAME}/transcribe?role=agent&amp;conferenceId=${friendlyName}&amp;isFirstCall=true&amp;syncKey=${friendlyName}_agent</Redirect></Response>`,
-      });
-
-      console.log(`✅ Agent redirected to start greeting`);
-    } else {
-      console.warn(`⚠️  Agent participant not found in conference ${conferenceSid}`);
-    }
-  } catch (error) {
-    console.error(`❌ Error redirecting agent:`, error);
-  }
+  // With startConferenceOnEnter=false for agent and startConferenceOnEnter=true for customer,
+  // the conference automatically starts when customer joins and both participants can interact
+  console.log(`✅ Conference orchestration complete - both participants active`);
 
   return {
     success: true,

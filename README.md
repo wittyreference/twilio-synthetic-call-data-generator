@@ -26,7 +26,7 @@ Generates realistic synthetic call data for testing, development, and analytics:
 ## 🛠 Tech Stack
 
 - **Backend**: Node.js 18+, Twilio Serverless Functions
-- **AI**: OpenAI GPT-5-nano, Twilio Voice Intelligence
+- **AI**: OpenAI gpt-4o-mini, Twilio Voice Intelligence
 - **Data**: Segment CDP, Twilio Sync
 - **Testing**: Jest (634 tests), Newman (Postman)
 - **CI/CD**: GitHub Actions
@@ -40,10 +40,10 @@ Generates realistic synthetic call data for testing, development, and analytics:
 |---------|-------|------|
 | Twilio Voice | 200 minutes @ $0.013/min | ~$2.60 |
 | Twilio Voice Intelligence | 200 minutes @ $0.02/min | ~$4.00 |
-| OpenAI GPT-5-nano | ~1M tokens @ $0.05/1M input, $0.40/1M output | ~$0.15 |
+| OpenAI gpt-4o-mini | ~1M tokens @ $0.15/1M input, $0.60/1M output | ~$0.30 |
 | Twilio Sync | Included in usage | Free tier |
 | Segment CDP | Up to 10K MTUs/month | Free tier |
-| **Total** | | **~$6.75 per 100 calls** |
+| **Total** | | **~$6.90 per 100 calls** |
 
 **Budget Planning**:
 - `MAX_DAILY_CALLS=1000` (default) = ~$67.50/day maximum
@@ -53,7 +53,7 @@ Generates realistic synthetic call data for testing, development, and analytics:
 **Cost Controls Built-in**:
 - ✅ **Auto-termination at 5 minutes** - Prevents runaway conversation costs
 - ✅ **Rate limiting** - `MAX_DAILY_CALLS` prevents accidental overspending
-- ✅ **Efficient model** - GPT-5-nano is 20x cheaper than GPT-4
+- ✅ **Efficient model** - gpt-4o-mini is optimized for cost and performance
 
 **Cost-Saving Tips**:
 - Use shorter conversations for testing (conferences auto-terminate at 5 minutes)

@@ -1,6 +1,11 @@
 // ABOUTME: Timer function for terminating Twilio conferences after specified duration
 // ABOUTME: Updates conference status to 'completed' via Twilio API
 
+// ⚠️ LOCKED FILE - DO NOT MODIFY WITHOUT MC'S EXPLICIT AUTHORIZATION ⚠️
+// This file controls conference termination logic which is WORKING correctly.
+// See docs/CALL-INFRASTRUCTURE-LOCKDOWN.md for details.
+// Any modifications require MC to say: "I AUTHORIZE YOU TO MODIFY conference-timer.js"
+
 exports.handler = async function (context, event, callback) {
   try {
     // Validate required ConferenceSid

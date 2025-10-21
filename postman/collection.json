@@ -158,6 +158,72 @@
       }
     },
     {
+      "name": "Get Conference Status",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('Status code is 200 OK', function () {",
+              "    pm.response.to.have.status(200);",
+              "});",
+              "",
+              "pm.test('Conference status response is valid', function () {",
+              "    const jsonData = pm.response.json();",
+              "    ",
+              "    // Verify conference SID",
+              "    pm.expect(jsonData).to.have.property('sid');",
+              "    pm.expect(jsonData.sid).to.match(/^CF[a-f0-9]{32}$/);",
+              "    ",
+              "    // Verify status field",
+              "    pm.expect(jsonData).to.have.property('status');",
+              "    pm.expect(jsonData.status).to.be.oneOf(['init', 'in-progress', 'completed']);",
+              "    ",
+              "    // Verify friendly name",
+              "    pm.expect(jsonData).to.have.property('friendly_name');",
+              "    ",
+              "    console.log('Conference Status:', jsonData.status);",
+              "    console.log('Friendly Name:', jsonData.friendly_name);",
+              "});"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "auth": {
+          "type": "basic",
+          "basic": [
+            {
+              "key": "username",
+              "value": "{{TWILIO_ACCOUNT_SID}}",
+              "type": "string"
+            },
+            {
+              "key": "password",
+              "value": "{{TWILIO_AUTH_TOKEN}}",
+              "type": "string"
+            }
+          ]
+        },
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "https://api.twilio.com/2010-04-01/Accounts/{{TWILIO_ACCOUNT_SID}}/Conferences/{{conferenceId}}.json",
+          "protocol": "https",
+          "host": ["api", "twilio", "com"],
+          "path": [
+            "2010-04-01",
+            "Accounts",
+            "{{TWILIO_ACCOUNT_SID}}",
+            "Conferences",
+            "{{conferenceId}}.json"
+          ]
+        },
+        "description": "Fetches conference status from Twilio REST API using the conference SID saved from the Create Conference request"
+      }
+    },
+    {
       "name": "Terminate Conference",
       "event": [
         {

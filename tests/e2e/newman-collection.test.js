@@ -228,7 +228,7 @@ describe('Postman Collection Structure', () => {
       const scriptLines = testEvent.script.exec.join('\n');
 
       expect(scriptLines).toContain('pm.environment.set');
-      expect(scriptLines).toContain('conferenceSid');
+      expect(scriptLines).toContain('conferenceId');
     });
 
     it('should validate response schema', () => {
@@ -240,7 +240,7 @@ describe('Postman Collection Structure', () => {
       const scriptLines = testEvent.script.exec.join('\n');
 
       expect(scriptLines).toContain('jsonData');
-      expect(scriptLines).toMatch(/sid|conferenceSid/);
+      expect(scriptLines).toMatch(/conferenceId/);
     });
   });
 

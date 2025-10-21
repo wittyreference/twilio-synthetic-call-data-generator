@@ -1,6 +1,12 @@
 // ABOUTME: Sends transcribed speech to OpenAI and returns AI response as TwiML
 // ABOUTME: Maintains conversation history and loops back to /transcribe for continuous dialogue
 
+// ⚠️ LOCKED FILE - DO NOT MODIFY WITHOUT MC'S EXPLICIT AUTHORIZATION ⚠️
+// This file controls OpenAI integration which is WORKING with multi-turn conversations.
+// Model: gpt-4o-mini | Empty response validation: ENABLED
+// See docs/CALL-INFRASTRUCTURE-LOCKDOWN.md for details.
+// Any modifications require MC to say: "I AUTHORIZE YOU TO MODIFY respond.js"
+
 const { OpenAI } = require('openai');
 const personaPath = Runtime.getFunctions()['utils/persona-loader'].path;
 const { loadPersona } = require(personaPath);
@@ -152,13 +158,20 @@ exports.handler = async function (context, event, callback) {
     // Get OpenAI response
     console.log(`🤖 Sending to OpenAI with ${messages.length} messages`);
     const completion = await openai.chat.completions.create({
-      model: 'gpt-5-nano',
+      model: 'gpt-4o-mini',
       messages: messages,
       max_completion_tokens: 150,
     });
 
-    const aiResponse = completion.choices[0].message.content;
-    console.log(`✅ OpenAI response: "${aiResponse}"`);
+    let aiResponse = completion.choices[0].message.content;
+    console.log(`✅ OpenAI response received: "${aiResponse}"`);
+
+    // Validate that OpenAI returned a non-empty response
+    if (!aiResponse || aiResponse.trim() === '') {
+      console.error('❌ OpenAI returned empty response! Using fallback.');
+      console.error(`   Completion object: ${JSON.stringify(completion)}`);
+      aiResponse = "I apologize, I didn't catch that. Could you please repeat?";
+    }
 
     // Add assistant message to history
     messages.push({

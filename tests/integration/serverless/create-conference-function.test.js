@@ -53,10 +53,11 @@ describe('Serverless Create Conference Function Integration', () => {
       expect(response.agent.callSid).toMatch(/^CA[a-f0-9]{32}$/);
 
       // Validate timer metadata
-      expect(response.timer).toHaveProperty('scheduled', false);
+      expect(response.timer).toHaveProperty('scheduled', true);
+      expect(response.timer).toHaveProperty('method', 'timeLimit parameter on participant');
       expect(response.timer).toHaveProperty('note');
       expect(response.timer).toHaveProperty('timerUrl');
-      expect(response.timer).toHaveProperty('suggestedTerminateAt');
+      expect(response.timer).toHaveProperty('terminatesAt');
     }, timeout);
 
     it('should create conference with random strategy', async () => {
@@ -173,17 +174,18 @@ describe('Serverless Create Conference Function Integration', () => {
       const response = JSON.parse(output);
 
       expect(response.timer).toEqual({
-        scheduled: false,
-        note: expect.stringContaining('external scheduler'),
+        scheduled: true,
+        method: 'timeLimit parameter on participant',
+        note: 'Participants auto-terminate after 5 minutes via Twilio timeLimit',
         timerUrl: `https://${domain}/conference-timer`,
         conferenceId: response.conferenceId,
-        suggestedTerminateAt: expect.any(String),
+        terminatesAt: expect.any(String),
       });
 
-      // Validate suggestedTerminateAt is ~5 minutes from now
-      const suggestedTime = new Date(response.timer.suggestedTerminateAt);
+      // Validate terminatesAt is ~5 minutes from now
+      const terminatesTime = new Date(response.timer.terminatesAt);
       const now = new Date();
-      const diffMinutes = (suggestedTime - now) / 1000 / 60;
+      const diffMinutes = (terminatesTime - now) / 1000 / 60;
 
       expect(diffMinutes).toBeGreaterThan(4); // At least 4 minutes
       expect(diffMinutes).toBeLessThan(6); // At most 6 minutes
