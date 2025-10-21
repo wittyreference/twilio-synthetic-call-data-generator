@@ -30,8 +30,6 @@
     "setup": "node scripts/setup.js",
     "provision-numbers": "node scripts/provision-phone-numbers.js",
     "configure-numbers": "node scripts/configure-phone-numbers.js",
-    "create-issue": "node scripts/create-github-issue.js",
-    "sync-todos": "node scripts/sync-todos.js",
     "validate": "npm run build && npm run test:api",
     "validate:env": "node scripts/validate-env-example.js",
     "validate:env:example": "node scripts/validate-env-example.js --example",
