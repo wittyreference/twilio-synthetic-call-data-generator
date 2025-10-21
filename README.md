@@ -1,5 +1,16 @@
 # Twilio Synthetic Call Data Generator
 
+[![License](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
+[![Tests](https://img.shields.io/badge/tests-passing-brightgreen.svg)](tests/)
+[![Node](https://img.shields.io/badge/node-%3E%3D18-brightgreen.svg)](package.json)
+[![Twilio](https://img.shields.io/badge/Twilio-Compatible-red.svg)](https://www.twilio.com)
+
+> Generate realistic AI-powered customer service phone conversations for testing Voice Intelligence, analytics pipelines, and contact center workflows.
+
+**📌 This is a GitHub Template** - Click the "Use this template" button above to create your own repository with this code!
+
+---
+
 A production-grade system for generating realistic synthetic call data using Twilio Programmable Voice and Segment CDP. Features random customer-agent pairing for realistic scenarios (including challenging interactions), AI-powered conversations with OpenAI, Voice Intelligence transcription, and ML-based customer profiling with churn risk and propensity scores.
 
 **Architecture**: Built with production-grade patterns including comprehensive test coverage for core TwiML functions, retry logic with exponential backoff, circuit breakers, and webhook signature validation.
@@ -63,6 +74,7 @@ Generates realistic synthetic call data for testing, development, and analytics:
 
 ## 📋 Table of Contents
 
+- [Using This Template](#-using-this-template)
 - [Quick Start](#quick-start)
 - [Development Tools](#development-tools)
 - [Detailed Setup](#detailed-setup)
@@ -83,6 +95,61 @@ Generates realistic synthetic call data for testing, development, and analytics:
 - **📊 [Segment Setup](docs/segment-setup-guide.md)** - Configure Segment CDP integration
 - **🔄 [Event Streams Setup](docs/event-streams-setup.md)** - Configure Twilio Event Streams
 - **💾 [Sync Setup](docs/sync-setup-guide.md)** - Configure Twilio Sync for state management
+
+## 🎯 Using This Template
+
+This repository is a **GitHub Template**. Create your own synthetic call data generator in 3 steps:
+
+### 1. Create Your Repository
+1. Click **"Use this template"** at the top of this page
+2. Name your repository (e.g., `my-call-data-generator`)
+3. Choose visibility (public or private)
+4. Click **"Create repository from template"**
+
+### 2. Clone and Setup
+```bash
+# Clone YOUR new repository (not this template!)
+git clone https://github.com/YOUR-USERNAME/YOUR-REPO-NAME.git
+cd YOUR-REPO-NAME
+
+# Install dependencies
+npm install
+
+# Configure environment
+cp .env.example .env
+# Edit .env with your Twilio and OpenAI credentials
+```
+
+### 3. Deploy and Test
+```bash
+# Deploy to Twilio
+npm run deploy
+
+# Generate your first test call
+curl -X POST "https://YOUR-DOMAIN.twil.io/create-conference" \
+  -u "$TWILIO_ACCOUNT_SID:$TWILIO_AUTH_TOKEN" \
+  -d "agentPhoneNumber=YOUR_PHONE_NUMBER"
+```
+
+**That's it!** Check Twilio Console → Voice Intelligence → Transcripts to see your synthetic conversation.
+
+### Customization
+
+**Update Personas**: Edit `assets/customers.json` and `assets/agents.json` to match your business:
+- Customer pain points and technical proficiency
+- Agent characteristics and competence levels
+- Introduction scripts and conversation patterns
+
+**Adjust Call Behavior**:
+- **Duration**: Modify `timeLimit` in `functions/utils/add-participant.js` (default: 5 minutes)
+- **AI Model**: Change OpenAI model in `functions/respond.js` (default: gpt-4o-mini)
+- **Speech Recognition**: Adjust `speechModel` in `functions/transcribe.js` (default: experimental_conversations)
+
+**Add Integrations**:
+- **Segment CDP**: See [docs/segment-setup-guide.md](docs/segment-setup-guide.md)
+- **Kinesis Streaming**: See [docs/event-streams-setup.md](docs/event-streams-setup.md)
+
+---
 
 ## ⚡ Quick Start (5 Minutes)
 
